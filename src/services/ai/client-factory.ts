@@ -3,6 +3,8 @@ import { AIClient } from './types';
 import { GeminiClient } from './gemini';
 import { OpenAIClient } from './openai';
 import { AnthropicClient } from './anthropic';
+import { GroqClient } from './groq';
+import { FailoverRouter } from './failover-router';
 
 /**
  * Returns an instantiated AIClient matching the provider configured in AppSettings.
@@ -30,6 +32,18 @@ export function getAIClient(settings: AppSettings): AIClient {
         settings.modelAnthropic,
         settings.temperature
       );
+    case 'groq':
+      return new GroqClient(
+        settings.apiKeyGroq,
+        settings.modelGroq,
+        settings.temperature
+      );
+    case 'auto':
+      return new FailoverRouter({
+        apiKeyGroq: settings.apiKeyGroq,
+        apiKeyGemini: settings.apiKeyGemini,
+        temperature: settings.temperature,
+      });
     default:
       throw new Error(`Unsupported AI provider: ${(settings as any)?.provider}`);
   }
