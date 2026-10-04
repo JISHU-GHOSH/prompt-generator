@@ -10,7 +10,8 @@
     "build:web": "tsc --noEmit && vite build --config vite.config.web.ts",
     "generate-icons": "node scripts/generate-icons.js",
     "test": "vitest run",
-    "test:dist": "vitest run tests/manifest.test.ts"
+    "test:dist": "vitest run tests/manifest.test.ts",
+    "package:extension": "npm run build && powershell -Command \"Compress-Archive -Path dist/* -DestinationPath promptforge-ai-extension.zip -Force\""
   },
   "dependencies": {
     "clsx": "^2.1.1",
