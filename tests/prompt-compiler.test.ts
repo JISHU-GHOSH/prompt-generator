@@ -5,13 +5,14 @@ import { PRESETS, getPreset } from '../src/services/prompt-engine/presets';
 describe('Meta-Prompt Compiler', () => {
   it('should compile a coding agent prompt with Promptify AI structure and tech stack', () => {
     const result = compileMetaPrompt({
-      rawInput: 'add dark mode toggle',
+      rawInput: 'build a dark mode toggle feature',
       preset: 'coding-agent',
       techStack: ['Next.js', 'Tailwind CSS'],
+      intent: 'kickoff',
     });
 
     expect(result.systemPrompt).toContain('Promptify AI');
-    expect(result.userPrompt).toContain('add dark mode toggle');
+    expect(result.userPrompt).toContain('build a dark mode toggle feature');
     expect(result.userPrompt).toContain('Next.js');
     expect(result.userPrompt).toContain('Tailwind CSS');
     expect(result.systemPrompt).toContain('PARAGRAPH 1');

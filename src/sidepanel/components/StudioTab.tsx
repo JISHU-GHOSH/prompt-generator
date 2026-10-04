@@ -13,8 +13,9 @@ import {
   KeyRound,
   RotateCcw,
 } from 'lucide-react';
-import { PresetType, ProviderType } from '../../types';
+import { PresetType, ProviderType, PromptIntent } from '../../types';
 import { PRESET_LIST } from '../../services/prompt-engine/presets';
+import { detectPromptIntent } from '../../services/prompt-engine/compiler';
 import { OutputViewer } from './OutputViewer';
 
 export interface StudioTabProps {
@@ -29,6 +30,7 @@ export interface StudioTabProps {
   outputPrompt: string;
   setOutputPrompt: (val: string) => void;
   activeModel?: string;
+  intent?: PromptIntent;
   isGenerating: boolean;
   error: string | null;
   setError: (err: string | null) => void;
@@ -65,6 +67,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
   setAdditionalContext,
   outputPrompt,
   activeModel,
+  intent,
   isGenerating,
   error,
   setError,
@@ -78,6 +81,8 @@ export const StudioTab: React.FC<StudioTabProps> = ({
 }) => {
   const [newTagInput, setNewTagInput] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const liveIntent = detectPromptIntent(rawInput);
 
   const getPresetIcon = (id: PresetType) => {
     switch (id) {
@@ -189,9 +194,22 @@ export const StudioTab: React.FC<StudioTabProps> = ({
       {/* Raw Input Prompt */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            Raw Thought / Requirement
-          </label>
+          <div className="flex items-center space-x-2">
+            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              Raw Thought / Requirement
+            </label>
+            {rawInput.trim() && (
+              <span
+                className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
+                  liveIntent === 'followup'
+                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                    : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
+                }`}
+              >
+                {liveIntent === 'followup' ? '⚡ Follow-Up Steer' : '🎯 Project Kickoff'}
+              </span>
+            )}
+          </div>
           {rawInput && (
             <button
               onClick={() => setRawInput('')}
@@ -327,7 +345,11 @@ export const StudioTab: React.FC<StudioTabProps> = ({
         }`}
       >
         <Sparkles className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
-        <span>{isGenerating ? 'Promptifying...' : 'Promptify (Enhance Prompt)'}</span>
+        <span>
+          {isGenerating
+            ? (liveIntent === 'followup' ? 'Synthesizing Mini-Prompt...' : 'Promptifying...')
+            : (liveIntent === 'followup' ? 'Promptify Mini-Prompt (Follow-Up)' : 'Promptify (Enhance Prompt)')}
+        </span>
       </button>
 
       {/* Generated Output Viewer */}
@@ -336,6 +358,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
           <OutputViewer
             prompt={outputPrompt}
             activeModel={activeModel}
+            intent={intent || (rawInput.trim() ? liveIntent : undefined)}
             isStreaming={isGenerating}
             onSendToTab={onSendToTab}
             onSave={onSave}

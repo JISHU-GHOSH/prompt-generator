@@ -6,7 +6,7 @@ import { SettingsTab } from './components/SettingsTab';
 import { storageService, DEFAULT_SETTINGS } from '../services/storage';
 import { compileMetaPrompt } from '../services/prompt-engine/compiler';
 import { getAIClient } from '../services/ai/client-factory';
-import { AppSettings, PromptHistoryItem, PresetType } from '../types';
+import { AppSettings, PromptHistoryItem, PresetType, PromptIntent } from '../types';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'studio' | 'library' | 'settings'>('studio');
@@ -20,6 +20,7 @@ export const App: React.FC = () => {
   const [additionalContext, setAdditionalContext] = useState('');
   const [outputPrompt, setOutputPrompt] = useState('');
   const [activeModel, setActiveModel] = useState<string | undefined>(undefined);
+  const [currentIntent, setCurrentIntent] = useState<PromptIntent | undefined>(undefined);
   const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +83,8 @@ export const App: React.FC = () => {
         additionalContext: additionalContext.trim() || undefined,
       });
 
+      setCurrentIntent(compiled.intent);
+
       const client = getAIClient(settings);
       const enhanced = await client.generatePrompt(compiled.systemPrompt, compiled.userPrompt);
       const modelUsed =
@@ -108,6 +111,7 @@ export const App: React.FC = () => {
         techStack,
         isFavorite: false,
         activeModelUsed: modelUsed,
+        intent: compiled.intent,
       });
 
       setHistory((prev) => [savedItem, ...prev]);
@@ -170,6 +174,7 @@ export const App: React.FC = () => {
     setTechStack([...item.techStack]);
     setOutputPrompt(item.enhancedPrompt);
     setActiveModel(item.activeModelUsed);
+    setCurrentIntent(item.intent);
     setCurrentHistoryId(item.id);
     setError(null);
     setActiveTab('studio');
@@ -204,6 +209,7 @@ export const App: React.FC = () => {
         techStack,
         isFavorite: true,
         activeModelUsed: activeModel,
+        intent: currentIntent,
       });
       setHistory((prev) => [newItem, ...prev]);
       setCurrentHistoryId(newItem.id);
@@ -252,6 +258,7 @@ export const App: React.FC = () => {
             outputPrompt={outputPrompt}
             setOutputPrompt={setOutputPrompt}
             activeModel={activeModel}
+            intent={currentIntent}
             isGenerating={isGenerating}
             error={error}
             setError={setError}

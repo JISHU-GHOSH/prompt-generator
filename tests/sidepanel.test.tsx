@@ -418,5 +418,28 @@ describe('Side Panel React Application', () => {
       ).toBeInTheDocument();
       expect(screen.getByText(/llama-3.3-70b-versatile/i)).toBeInTheDocument();
     });
+
+    it('should auto-detect follow-up steer and display Follow-Up Steer badge in OutputViewer', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('## Surgical Steering Mini-Prompt');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+        getActiveModelUsed: vi.fn().mockReturnValue('llama-3.3-70b-versatile'),
+      } as any);
+
+      render(<App />);
+
+      const textarea = await screen.findByPlaceholderText(/Describe what you want to build/i);
+      fireEvent.change(textarea, { target: { value: 'make it faster and fix TypeError' } });
+
+      // Follow-up intent pill should be visible
+      expect(screen.getByText(/⚡ Follow-Up Steer/i)).toBeInTheDocument();
+
+      const enhanceBtn = screen.getByRole('button', { name: /Mini-Prompt|Promptify|Enhance/i });
+      fireEvent.click(enhanceBtn);
+
+      expect(await screen.findByText(/Surgical Steering Mini-Prompt/i)).toBeInTheDocument();
+      // Result badge should also show Follow-Up Steer
+      expect(screen.getAllByText(/Follow-Up Steer/i).length).toBeGreaterThanOrEqual(1);
+    });
   });
 });

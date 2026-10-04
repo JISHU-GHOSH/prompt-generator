@@ -360,6 +360,44 @@ describe('LocalSynthesizer', () => {
     expect(router.getActiveModelUsed()).toBe('llama-3.3-70b-versatile (Proxy)');
   });
 
+  it('should generate surgical mini-prompt for error follow-up without persona boilerplate', async () => {
+    const synth = new LocalSynthesizer();
+    const prompt = await synth.generatePrompt(
+      'System persona instructions',
+      '## Raw User Request\nfix TypeError: Cannot read properties of undefined (reading data)\n\n## Interaction Mode\nFollow-Up / Conversational Steer (Generate a surgical, focused prompt with NO persona introduction)'
+    );
+
+    expect(prompt).not.toContain('You are a senior software engineer');
+    expect(prompt).not.toContain('You are a principal');
+    expect(prompt).toContain('Diagnose and resolve the following issue');
+    expect(prompt).toContain('TypeError');
+    expect(prompt).toContain('// ...rest of code');
+  });
+
+  it('should generate surgical mini-prompt for performance optimization follow-up', async () => {
+    const synth = new LocalSynthesizer();
+    const prompt = await synth.generatePrompt(
+      'System persona instructions',
+      'make it faster and reduce memory footprint'
+    );
+
+    expect(prompt).not.toContain('You are a senior software engineer');
+    expect(prompt).toContain('Refactor the existing implementation to improve performance');
+    expect(prompt).toContain('placeholder comments');
+  });
+
+  it('should generate surgical test prompt for follow-up testing requests', async () => {
+    const synth = new LocalSynthesizer();
+    const prompt = await synth.generatePrompt(
+      'System persona instructions',
+      'add pytest unit tests for the auth service'
+    );
+
+    expect(prompt).not.toContain('You are a senior software engineer');
+    expect(prompt).toContain('Generate an exhaustive test suite');
+    expect(prompt).toContain('boundary conditions');
+  });
+
   it('should invoke onChunk callback when provided', async () => {
     const synth = new LocalSynthesizer();
     const chunks: string[] = [];

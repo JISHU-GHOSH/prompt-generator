@@ -98,7 +98,13 @@ PromptForge AI features an autonomous, multi-tier cascade engine designed to max
   - **GitHub Discussions / Issues / PRs** (`https://github.com/*`)
 - Click the wand to compile your rough thought into an exhaustive technical prompt without ever leaving the page.
 
-### 3. 🔑 Bring Your Own Key (BYOK) — Optional Power Mode
+### 3. 🧠 Smart Auto-Detection: Kickoff vs. Follow-Up Mini-Prompts
+Never get stuck repeating *"You are a senior software engineer acting as technical lead..."* when you're in the middle of a coding conversation:
+- 🎯 **Project Kickoff**: When architecting a new feature or service (*"make a python weather app"*), PromptForge AI compiles a comprehensive, multi-paragraph Master Architectural Specification.
+- ⚡ **Follow-Up Steer**: When providing iterative steering (*"make it faster"*, *"now do step 2"*, *"TypeError on line 14"*, *"add pytest tests"*), PromptForge AI automatically detects conversational follow-up intent and outputs a **surgical, high-leverage mini-prompt with ZERO persona intro boilerplate**.
+- 🏷️ **Real-Time Visual Feedback**: Live intent indicators (`🎯 Project Kickoff` vs `⚡ Follow-Up Steer`) in both the Chrome Extension Side Panel and the Web Studio.
+
+### 4. 🔑 Bring Your Own Key (BYOK) — Optional Power Mode
 - While PromptForge AI works out of the box with zero keys, power users can configure custom API keys in the **Settings** tab for direct access:
   - **Groq Cloud** (LLaMA 3.3 70B, LLaMA 3.1 8B)
   - **Google AI Studio** (Gemini 3.8 Flash, Gemini 2.5 Flash, Gemini 2.5 Pro)

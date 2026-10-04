@@ -1,14 +1,38 @@
 import React, { useState } from 'react';
 import { Copy, Check, Send, CheckCircle2, Bookmark, BookmarkCheck } from 'lucide-react';
+import { PromptIntent } from '../../types';
 
 export interface OutputViewerProps {
   prompt: string;
   activeModel?: string;
+  intent?: PromptIntent;
   isStreaming?: boolean;
   onSendToTab?: () => Promise<boolean | void> | void;
   onSave?: () => Promise<void> | void;
   isSaved?: boolean;
 }
+
+export const renderIntentBadge = (intent?: PromptIntent) => {
+  if (!intent) return null;
+  if (intent === 'followup') {
+    return (
+      <span
+        title="Conversational Follow-Up (Surgical Mini-Prompt with Zero Persona Boilerplate)"
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
+      >
+        ⚡ Follow-Up Steer
+      </span>
+    );
+  }
+  return (
+    <span
+      title="Project Kickoff (Full Master Architecture Specification)"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 shadow-sm"
+    >
+      🎯 Project Kickoff
+    </span>
+  );
+};
 
 export const renderModelBadge = (model?: string) => {
   if (!model) return null;
@@ -88,6 +112,7 @@ export const renderModelBadge = (model?: string) => {
 export const OutputViewer: React.FC<OutputViewerProps> = ({
   prompt,
   activeModel,
+  intent,
   isStreaming = false,
   onSendToTab,
   onSave,
@@ -133,6 +158,7 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
       <div className="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800">
         <div className="flex items-center space-x-2 text-[11px] text-slate-400">
           <span className="font-semibold text-slate-200">Result</span>
+          {renderIntentBadge(intent)}
           {renderModelBadge(activeModel)}
           <span>•</span>
           <span>{wordCount} words</span>

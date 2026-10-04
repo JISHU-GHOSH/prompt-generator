@@ -1,6 +1,7 @@
 import { AIClient } from './types';
 import { GroqClient, RateLimitError } from './groq';
 import { GeminiClient, GeminiRateLimitError } from './gemini';
+import { detectPromptIntent } from '../prompt-engine/compiler';
 
 /**
  * Fallback reason patterns and classification for automatic failover.
@@ -53,9 +54,54 @@ export class LocalSynthesizer implements AIClient {
     return output;
   }
 
+  private synthesizeFollowUp(rawInput: string, additionalContext?: string): string {
+    const lower = rawInput.toLowerCase();
+
+    // 1. Error / bug / crash
+    if (/\b(error|exception|traceback|crashed|crashing|failing|failed|bug|broken|syntaxerror|typeerror|referenceerror|nullpointer)\b/i.test(lower)) {
+      return `Diagnose and resolve the following issue in the current implementation: ${rawInput}.
+
+Identify the exact root cause of the failure and explain why it occurred. Provide the complete, corrected code replacing the affected function or component. Ensure strict null/undefined checks, verify all import statements, and do not omit any code using placeholder comments (e.g., '// ...rest of code').${additionalContext ? ` Project context: ${additionalContext}.` : ''}`;
+    }
+
+    // 2. Performance / optimization / refactor
+    if (/\b(optimize|refactor|clean up|simplify|speed up|make faster|reduce memory)\b/i.test(lower)) {
+      return `Refactor the existing implementation to improve performance and code quality based on this instruction: ${rawInput}.
+
+Optimize critical execution paths, eliminate redundant allocations, and simplify complexity while preserving all existing behaviors and API contracts. Provide the complete, production-ready replacement code with full imports and no placeholder comments.${additionalContext ? ` Project context: ${additionalContext}.` : ''}`;
+    }
+
+    // 3. Tests / verification
+    if (/\b(tests?|pytest|vitest|jest|unit tests?)\b/i.test(lower)) {
+      return `Generate an exhaustive test suite for the current code to verify: ${rawInput}.
+
+Include test coverage for happy paths, boundary conditions, edge cases (empty collections, null/undefined inputs), and failure modes. Ensure tests are self-contained, fully typed, and ready to execute immediately with clear assertion messages.${additionalContext ? ` Project context: ${additionalContext}.` : ''}`;
+    }
+
+    // 4. Next step / continuation
+    if (/\b(next step|step \d+|now do|continue|proceed)\b/i.test(lower)) {
+      return `Implement the next step of the project: ${rawInput}.
+
+Ensure this addition integrates seamlessly with the existing architecture and contracts. Output complete, runnable code with all required imports and defensive error handling—do not leave any placeholder comments.${additionalContext ? ` Project context: ${additionalContext}.` : ''}`;
+    }
+
+    // 5. Default surgical follow-up steer
+    return `Apply the following technical modification to the ongoing implementation: ${rawInput}.
+
+Preserve all established architectural patterns and conventions. Deliver the complete, verified code with exhaustive type safety and error boundaries, omitting no logic through placeholder comments.${additionalContext ? ` Project context: ${additionalContext}.` : ''}`;
+  }
+
   private synthesize(userPrompt: string): string {
     const rawMatch = userPrompt.match(/## Raw User Request\s*([\s\S]*?)(?=##|$)/i);
     const rawInput = (rawMatch ? rawMatch[1] : userPrompt).trim() || 'Execute the requested software engineering task';
+
+    const contextMatch = userPrompt.match(/## Additional Project Context\s*([\s\S]*?)(?=##|$)/i);
+    const additionalContext = contextMatch ? contextMatch[1].trim() : '';
+
+    const isFollowUp = userPrompt.includes('Interaction Mode\nFollow-Up') || detectPromptIntent(rawInput) === 'followup';
+    if (isFollowUp) {
+      return this.synthesizeFollowUp(rawInput, additionalContext);
+    }
 
     const stackMatch = userPrompt.match(/## Target Tech Stack\s*([\s\S]*?)(?=##|$)/i);
     const techStack = stackMatch
@@ -65,9 +111,6 @@ export class LocalSynthesizer implements AIClient {
           .filter(Boolean)
           .join(', ')
       : '';
-
-    const contextMatch = userPrompt.match(/## Additional Project Context\s*([\s\S]*?)(?=##|$)/i);
-    const additionalContext = contextMatch ? contextMatch[1].trim() : '';
 
     const lowerInput = rawInput.toLowerCase();
 

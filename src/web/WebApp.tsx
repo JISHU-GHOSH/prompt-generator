@@ -14,8 +14,8 @@ import {
   ArrowRight,
   ShieldCheck,
 } from 'lucide-react';
-import { PresetType } from '../types';
-import { compileMetaPrompt } from '../services/prompt-engine/compiler';
+import { PresetType, PromptIntent } from '../types';
+import { compileMetaPrompt, detectPromptIntent } from '../services/prompt-engine/compiler';
 import { FailoverRouter, LocalSynthesizer } from '../services/ai/failover-router';
 import { storageService } from '../services/storage';
 
@@ -54,9 +54,12 @@ export const WebApp: React.FC = () => {
   const [detailLevel, setDetailLevel] = useState<'brief' | 'standard' | 'comprehensive'>('standard');
   const [outputPrompt, setOutputPrompt] = useState('');
   const [activeModel, setActiveModel] = useState<string>('openai/gpt-oss-120b');
+  const [intent, setIntent] = useState<PromptIntent | undefined>(undefined);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const liveIntent = detectPromptIntent(rawInput);
 
   // Toggle tech stack item
   const toggleTech = (tech: string) => {
@@ -86,6 +89,8 @@ export const WebApp: React.FC = () => {
       additionalContext: detailLevel !== 'standard' ? `Detail Level: ${detailLevel}` : undefined,
     });
 
+    setIntent(compiled.intent);
+
     try {
       // 1. Try Vercel Serverless Function first (Zero-Key proxy)
       const res = await fetch('/api/generate', {
@@ -109,6 +114,7 @@ export const WebApp: React.FC = () => {
           techStack,
           isFavorite: false,
           activeModelUsed: data.model || 'openai/gpt-oss-120b',
+          intent: compiled.intent,
         });
         return;
       }
@@ -137,6 +143,7 @@ export const WebApp: React.FC = () => {
         techStack,
         isFavorite: false,
         activeModelUsed: router.getActiveModelUsed(),
+        intent: compiled.intent,
       });
     } catch (err: unknown) {
       console.warn('API error, falling back to offline synthesizer', err);
@@ -241,10 +248,23 @@ export const WebApp: React.FC = () => {
           <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-sm flex flex-col space-y-4">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-                  <Code2 className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Your Casual Thought or Idea</span>
-                </label>
+                <div className="flex items-center space-x-2">
+                  <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                    <Code2 className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Your Casual Thought or Idea</span>
+                  </label>
+                  {rawInput.trim() && (
+                    <span
+                      className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
+                        liveIntent === 'followup'
+                          ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                          : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
+                      }`}
+                    >
+                      {liveIntent === 'followup' ? '⚡ Follow-Up Steer' : '🎯 Project Kickoff'}
+                    </span>
+                  )}
+                </div>
                 <span className="text-[11px] text-slate-500 font-mono">
                   {rawInput.length} chars
                 </span>
@@ -388,12 +408,20 @@ export const WebApp: React.FC = () => {
               {isGenerating ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Synthesizing 120B Master Prompt...</span>
+                  <span>
+                    {liveIntent === 'followup'
+                      ? 'Synthesizing Surgical Mini-Prompt...'
+                      : 'Synthesizing 120B Master Prompt...'}
+                  </span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 fill-current" />
-                  <span>Enhance Prompt</span>
+                  <span>
+                    {liveIntent === 'followup'
+                      ? 'Synthesize Mini-Prompt (Follow-Up)'
+                      : 'Enhance Prompt (Kickoff)'}
+                  </span>
                   <span className="text-[10px] opacity-75 font-mono ml-1 hidden sm:inline">(Ctrl+Enter)</span>
                 </>
               )}
@@ -408,8 +436,19 @@ export const WebApp: React.FC = () => {
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  Compiled Technical Specification
+                  {intent === 'followup'
+                    ? 'Surgical Steering Mini-Prompt'
+                    : 'Compiled Technical Specification'}
                 </span>
+                {intent === 'followup' ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">
+                    ⚡ Follow-Up Steer
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-medium">
+                    🎯 Project Kickoff
+                  </span>
+                )}
                 {activeModel && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
                     ⚡ {activeModel}

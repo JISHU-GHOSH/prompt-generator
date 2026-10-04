@@ -22,6 +22,8 @@ export interface AppSettings {
   defaultTechStack: string[];
 }
 
+export type PromptIntent = 'kickoff' | 'followup';
+
 export interface PromptHistoryItem {
   id: string;
   timestamp: number;
@@ -31,6 +33,7 @@ export interface PromptHistoryItem {
   techStack: string[];
   isFavorite: boolean;
   activeModelUsed?: string;
+  intent?: PromptIntent;
 }
 
 export interface PresetConfig {
@@ -46,11 +49,13 @@ export interface CompilePromptOptions {
   preset: PresetType;
   techStack?: string[];
   additionalContext?: string;
+  intent?: PromptIntent;
 }
 
 export interface CompiledPrompt {
   systemPrompt: string;
   userPrompt: string;
+  intent: PromptIntent;
 }
 
 export interface ExtensionMessage<T = unknown> {
