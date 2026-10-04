@@ -91,12 +91,40 @@ Ensure this addition integrates seamlessly with the existing architecture and co
 Preserve all established architectural patterns and conventions. Deliver the complete, verified code with exhaustive type safety and error boundaries, omitting no logic through placeholder comments.${additionalContext ? ` Project context: ${additionalContext}.` : ''}`;
   }
 
+  private synthesizeIdeation(rawInput: string, additionalContext?: string): string {
+    return `You are a Principal Product Strategist, Lead System Architect, and Startup Technical Co-founder.
+
+I am designing a new product for: ${rawInput}.
+
+I need you to provide a comprehensive, prioritized Product Strategy and Feature Roadmap that aligns engineering and user experience:
+
+1. Target Personas & Core User Friction:
+   - Identify the primary user personas and the 3 most critical pain points or unmet needs they face in this problem space.
+
+2. Prioritized Feature Breakdown (Top 5–7 High-Impact Features):
+   - For each feature, detail:
+     - User Value Proposition: Why users will adopt and love this capability.
+     - Competitive Differentiator: How this feature sets the platform apart from generic alternatives or incumbents.
+     - Technical Feasibility & Complexity: Feasibility rating (Low / Medium / High) and core architectural dependencies.
+
+3. MVP Boundary Definition (Phase 1 vs. Phase 2):
+   - Explicitly define the minimum set of 3 core features required to launch a viable, compelling v1 product.
+   - Outline key product telemetry metrics (North Star metric, engagement indicators, and user retention drivers).${additionalContext ? `\n\nIncorporate existing constraints: ${additionalContext}.` : ''}
+
+CRITICAL REQUIREMENT: Focus strictly on product strategy, user experience journeys, feature prioritization, and system trade-offs. DO NOT generate code snippets or programming boilerplate at this ideation stage.`;
+  }
+
   private synthesize(userPrompt: string): string {
     const rawMatch = userPrompt.match(/## Raw User Request\s*([\s\S]*?)(?=##|$)/i);
     const rawInput = (rawMatch ? rawMatch[1] : userPrompt).trim() || 'Execute the requested software engineering task';
 
     const contextMatch = userPrompt.match(/## Additional Project Context\s*([\s\S]*?)(?=##|$)/i);
     const additionalContext = contextMatch ? contextMatch[1].trim() : '';
+
+    const isIdeation = userPrompt.includes('Interaction Mode\nProduct Ideation') || detectPromptIntent(rawInput) === 'ideation';
+    if (isIdeation) {
+      return this.synthesizeIdeation(rawInput, additionalContext);
+    }
 
     const isFollowUp = userPrompt.includes('Interaction Mode\nFollow-Up') || detectPromptIntent(rawInput) === 'followup';
     if (isFollowUp) {

@@ -12,6 +12,7 @@ import {
   ChevronUp,
   KeyRound,
   RotateCcw,
+  Lightbulb,
 } from 'lucide-react';
 import { PresetType, ProviderType, PromptIntent } from '../../types';
 import { PRESET_LIST } from '../../services/prompt-engine/presets';
@@ -88,6 +89,8 @@ export const StudioTab: React.FC<StudioTabProps> = ({
     switch (id) {
       case 'coding-agent':
         return <Bot className="w-3.5 h-3.5" />;
+      case 'ideation':
+        return <Lightbulb className="w-3.5 h-3.5" />;
       case 'rfc-spec':
         return <FileText className="w-3.5 h-3.5" />;
       case 'bugfix':
@@ -201,12 +204,18 @@ export const StudioTab: React.FC<StudioTabProps> = ({
             {rawInput.trim() && (
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
-                  liveIntent === 'followup'
+                  liveIntent === 'ideation'
+                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                    : liveIntent === 'followup'
                     ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
                     : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
                 }`}
               >
-                {liveIntent === 'followup' ? '⚡ Follow-Up Steer' : '🎯 Project Kickoff'}
+                {liveIntent === 'ideation'
+                  ? '💡 Feature Ideation'
+                  : liveIntent === 'followup'
+                  ? '⚡ Follow-Up Steer'
+                  : '🎯 Project Kickoff'}
               </span>
             )}
           </div>
@@ -347,8 +356,16 @@ export const StudioTab: React.FC<StudioTabProps> = ({
         <Sparkles className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
         <span>
           {isGenerating
-            ? (liveIntent === 'followup' ? 'Synthesizing Mini-Prompt...' : 'Promptifying...')
-            : (liveIntent === 'followup' ? 'Promptify Mini-Prompt (Follow-Up)' : 'Promptify (Enhance Prompt)')}
+            ? (liveIntent === 'ideation'
+                ? 'Synthesizing Feature Roadmap...'
+                : liveIntent === 'followup'
+                ? 'Synthesizing Mini-Prompt...'
+                : 'Promptifying...')
+            : (liveIntent === 'ideation'
+                ? 'Promptify Feature Roadmap (Ideation)'
+                : liveIntent === 'followup'
+                ? 'Promptify Mini-Prompt (Follow-Up)'
+                : 'Promptify (Enhance Prompt)')}
         </span>
       </button>
 

@@ -398,6 +398,21 @@ describe('LocalSynthesizer', () => {
     expect(prompt).toContain('boundary conditions');
   });
 
+  it('should generate product strategy roadmap without code snippets for ideation requests', async () => {
+    const synth = new LocalSynthesizer();
+    const prompt = await synth.generatePrompt(
+      'System persona instructions',
+      'i have to make an on this topic Interview preparation & practice tell me what features can we add and what should we do'
+    );
+
+    expect(prompt).toContain('Principal Product Strategist');
+    expect(prompt).toContain('Target Personas & Core User Friction');
+    expect(prompt).toContain('Prioritized Feature Breakdown');
+    expect(prompt).toContain('MVP Boundary Definition');
+    expect(prompt).toContain('DO NOT generate code snippets or programming boilerplate');
+    expect(prompt).not.toContain('```');
+  });
+
   it('should invoke onChunk callback when provided', async () => {
     const synth = new LocalSynthesizer();
     const chunks: string[] = [];

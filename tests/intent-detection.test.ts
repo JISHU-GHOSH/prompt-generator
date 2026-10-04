@@ -23,9 +23,32 @@ describe('Smart Intent Auto-Detection', () => {
       expect(detectPromptIntent('why is this code failing?')).toBe('followup');
       expect(detectPromptIntent('convert this to typescript')).toBe('followup');
     });
+
+    it('should classify feature brainstorming and discovery as ideation', () => {
+      expect(
+        detectPromptIntent('i have to make an on this topic Interview preparation & practice tell me what features can we add and what should we do')
+      ).toBe('ideation');
+      expect(detectPromptIntent('what features should we add to a fitness tracker app?')).toBe('ideation');
+      expect(detectPromptIntent('brainstorm unique ideas for an interview prep platform')).toBe('ideation');
+      expect(detectPromptIntent('suggest features for real-time collaborative coding')).toBe('ideation');
+      expect(detectPromptIntent('what to build for an AI career coach')).toBe('ideation');
+    });
   });
 
   describe('compileMetaPrompt with Auto-Intent', () => {
+    it('should use IDEATION_SYSTEM_PROMPT and ban code snippets when ideation intent is detected', () => {
+      const result = compileMetaPrompt({
+        rawInput: 'i have to make an on this topic Interview preparation & practice tell me what features can we add and what should we do',
+        preset: 'coding-agent',
+      });
+
+      expect(result.intent).toBe('ideation');
+      expect(result.systemPrompt).toContain('STRICT CONSTRAINT — NO CODE SNIPPETS');
+      expect(result.systemPrompt).toContain('Principal Product Strategist');
+      expect(result.userPrompt).toContain('Product Ideation & Feature Discovery');
+      expect(result.userPrompt).toContain('STRICTLY DO NOT generate code snippets');
+    });
+
     it('should use FOLLOWUP_SYSTEM_PROMPT and include Follow-Up Mode when follow-up intent is detected', () => {
       const result = compileMetaPrompt({
         rawInput: 'make it faster and handle null pointer error',

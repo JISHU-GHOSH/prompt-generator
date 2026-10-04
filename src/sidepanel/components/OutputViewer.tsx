@@ -14,6 +14,16 @@ export interface OutputViewerProps {
 
 export const renderIntentBadge = (intent?: PromptIntent) => {
   if (!intent) return null;
+  if (intent === 'ideation') {
+    return (
+      <span
+        title="Feature Ideation & Roadmap (Discovery without Premature Code)"
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-sm"
+      >
+        💡 Feature Ideation
+      </span>
+    );
+  }
   if (intent === 'followup') {
     return (
       <span

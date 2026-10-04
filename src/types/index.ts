@@ -2,7 +2,7 @@
  * PromptForge AI - Core Domain Types
  */
 
-export type PresetType = 'coding-agent' | 'rfc-spec' | 'bugfix' | 'cursorrules';
+export type PresetType = 'coding-agent' | 'rfc-spec' | 'bugfix' | 'cursorrules' | 'ideation';
 
 export type ProviderType = 'gemini' | 'openai' | 'anthropic' | 'groq' | 'auto';
 
@@ -22,7 +22,7 @@ export interface AppSettings {
   defaultTechStack: string[];
 }
 
-export type PromptIntent = 'kickoff' | 'followup';
+export type PromptIntent = 'kickoff' | 'followup' | 'ideation';
 
 export interface PromptHistoryItem {
   id: string;

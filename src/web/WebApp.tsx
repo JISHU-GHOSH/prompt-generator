@@ -34,16 +34,17 @@ const POPULAR_STACKS = [
 
 const PRESETS: Array<{ id: PresetType; name: string; desc: string }> = [
   { id: 'coding-agent', name: 'Coding Agent', desc: 'Cursor, Claude Code, Copilot' },
+  { id: 'ideation', name: 'Feature Ideation', desc: 'Product discovery & roadmap without code' },
   { id: 'rfc-spec', name: 'RFC Architecture Spec', desc: 'System design & data schemas' },
   { id: 'bugfix', name: 'Bug Fix & Root Cause', desc: 'Diagnosis, edge cases & repair' },
   { id: 'cursorrules', name: 'IDE Rules (.cursorrules)', desc: 'Strict coding conventions' },
 ];
 
 const INSPIRATION_PROMPTS = [
+  'interview preparation & practice: what features can we add and what should we do',
   'python app for sorting shopping list and prices',
   'make an python app to monitor weather telemetry',
   'bulletproof jwt authentication middleware with refresh tokens',
-  'high throughput web scraper with proxy rotation and playwright',
 ];
 
 export const WebApp: React.FC = () => {
@@ -256,12 +257,18 @@ export const WebApp: React.FC = () => {
                   {rawInput.trim() && (
                     <span
                       className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
-                        liveIntent === 'followup'
+                        liveIntent === 'ideation'
+                          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                          : liveIntent === 'followup'
                           ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
                           : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
                       }`}
                     >
-                      {liveIntent === 'followup' ? '⚡ Follow-Up Steer' : '🎯 Project Kickoff'}
+                      {liveIntent === 'ideation'
+                        ? '💡 Feature Ideation'
+                        : liveIntent === 'followup'
+                        ? '⚡ Follow-Up Steer'
+                        : '🎯 Project Kickoff'}
                     </span>
                   )}
                 </div>
@@ -409,7 +416,9 @@ export const WebApp: React.FC = () => {
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   <span>
-                    {liveIntent === 'followup'
+                    {liveIntent === 'ideation'
+                      ? 'Synthesizing Feature Roadmap...'
+                      : liveIntent === 'followup'
                       ? 'Synthesizing Surgical Mini-Prompt...'
                       : 'Synthesizing 120B Master Prompt...'}
                   </span>
@@ -418,7 +427,9 @@ export const WebApp: React.FC = () => {
                 <>
                   <Sparkles className="w-4 h-4 fill-current" />
                   <span>
-                    {liveIntent === 'followup'
+                    {liveIntent === 'ideation'
+                      ? 'Synthesize Feature Roadmap (Ideation)'
+                      : liveIntent === 'followup'
                       ? 'Synthesize Mini-Prompt (Follow-Up)'
                       : 'Enhance Prompt (Kickoff)'}
                   </span>
@@ -436,11 +447,17 @@ export const WebApp: React.FC = () => {
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                  {intent === 'followup'
+                  {intent === 'ideation'
+                    ? 'Product Strategy & Feature Roadmap'
+                    : intent === 'followup'
                     ? 'Surgical Steering Mini-Prompt'
                     : 'Compiled Technical Specification'}
                 </span>
-                {intent === 'followup' ? (
+                {intent === 'ideation' ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
+                    💡 Feature Ideation
+                  </span>
+                ) : intent === 'followup' ? (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">
                     ⚡ Follow-Up Steer
                   </span>

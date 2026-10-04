@@ -11,6 +11,7 @@ import {
   RFC_SPEC_SYSTEM_PROMPT,
   BUGFIX_SYSTEM_PROMPT,
   CURSORRULES_SYSTEM_PROMPT,
+  IDEATION_SYSTEM_PROMPT,
 } from './meta-prompts';
 
 export const PRESETS: Record<PresetType, PresetConfig> = {
@@ -20,6 +21,13 @@ export const PRESETS: Record<PresetType, PresetConfig> = {
     description: 'Optimized for Cursor, Claude Code, and Copilot with structured XML tags and clear execution steps.',
     icon: 'Bot',
     systemPrompt: CODING_AGENT_SYSTEM_PROMPT,
+  },
+  'ideation': {
+    id: 'ideation',
+    name: 'Feature Ideation & Roadmap',
+    description: 'Product discovery, feature brainstorming, user workflows, and MVP scope without premature code.',
+    icon: 'Lightbulb',
+    systemPrompt: IDEATION_SYSTEM_PROMPT,
   },
   'rfc-spec': {
     id: 'rfc-spec',
