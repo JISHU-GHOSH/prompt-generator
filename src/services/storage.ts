@@ -1,11 +1,14 @@
 import { AppSettings, PromptHistoryItem } from '../types';
 
+const envGroqKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GROQ_API_KEY) || '';
+const envGeminiKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY) || '';
+
 export const DEFAULT_SETTINGS: AppSettings = {
   provider: 'auto',
-  apiKeyGemini: '',
+  apiKeyGemini: envGeminiKey,
   apiKeyOpenAI: '',
   apiKeyAnthropic: '',
-  apiKeyGroq: '',
+  apiKeyGroq: envGroqKey,
   modelGemini: 'gemini-3.8-flash',
   modelOpenAI: 'gpt-4o-mini',
   modelAnthropic: 'claude-3-5-sonnet-20241022',
@@ -87,6 +90,8 @@ export const storageService: StorageServiceInterface = {
     return {
       ...DEFAULT_SETTINGS,
       ...stored,
+      apiKeyGroq: stored.apiKeyGroq || DEFAULT_SETTINGS.apiKeyGroq || '',
+      apiKeyGemini: stored.apiKeyGemini || DEFAULT_SETTINGS.apiKeyGemini || '',
       defaultTechStack: stored.defaultTechStack
         ? [...stored.defaultTechStack]
         : [...DEFAULT_SETTINGS.defaultTechStack],
