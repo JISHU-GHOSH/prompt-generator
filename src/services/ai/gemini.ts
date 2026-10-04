@@ -1,13 +1,21 @@
 import { AIClient } from './types';
 
+export class GeminiRateLimitError extends Error {
+  constructor(message: string = 'Gemini rate limit exceeded or quota exhausted') {
+    super(message);
+    this.name = 'GeminiRateLimitError';
+    Object.setPrototypeOf(this, GeminiRateLimitError.prototype);
+  }
+}
+
 export class GeminiClient implements AIClient {
   private readonly apiKey: string;
   private readonly model: string;
   private readonly temperature: number;
 
-  constructor(apiKey: string, model: string = 'gemini-2.5-flash', temperature: number = 0.4) {
+  constructor(apiKey: string, model: string = 'gemini-3.8-flash', temperature: number = 0.4) {
     this.apiKey = apiKey?.trim() || '';
-    this.model = model || 'gemini-2.5-flash';
+    this.model = model || 'gemini-3.8-flash';
     this.temperature = typeof temperature === 'number' ? temperature : 0.4;
   }
 
@@ -24,7 +32,7 @@ export class GeminiClient implements AIClient {
 
     const isStreaming = Boolean(onChunk);
     const action = isStreaming ? 'streamGenerateContent' : 'generateContent';
-    const cleanModel = (this.model || 'gemini-2.5-flash').replace(/^models\//, '');
+    const cleanModel = (this.model || 'gemini-3.8-flash').replace(/^models\//, '');
     let url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
       cleanModel
     )}:${action}?key=${encodeURIComponent(this.apiKey)}`;
@@ -185,7 +193,7 @@ export class GeminiClient implements AIClient {
       );
     }
     if (response.status === 429) {
-      throw new Error(
+      throw new GeminiRateLimitError(
         `Gemini API error (429): Rate limit exceeded or quota exhausted. ${errorDetail || 'Please check your Gemini account quota.'}`
       );
     }

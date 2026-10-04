@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getAIClient } from '../src/services/ai/client-factory';
-import { GeminiClient } from '../src/services/ai/gemini';
+import { GeminiClient, GeminiRateLimitError } from '../src/services/ai/gemini';
 import { OpenAIClient } from '../src/services/ai/openai';
 import { AnthropicClient } from '../src/services/ai/anthropic';
 import { DEFAULT_SETTINGS } from '../src/services/storage';
@@ -12,7 +12,7 @@ describe('AI Client Factory', () => {
   });
 
   it('should throw an error if API key is missing for the selected provider', async () => {
-    const client = getAIClient({ ...DEFAULT_SETTINGS, apiKeyGemini: '' });
+    const client = getAIClient({ ...DEFAULT_SETTINGS, provider: 'gemini', apiKeyGemini: '' });
     await expect(client.generatePrompt('system', 'user')).rejects.toThrow(/API key is missing/i);
   });
 
@@ -66,7 +66,7 @@ describe('GeminiClient', () => {
 
     expect(response).toBe('Optimized technical prompt');
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=dummy-gemini-key'),
+      expect.stringContaining('generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=dummy-gemini-key'),
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -79,6 +79,44 @@ describe('GeminiClient', () => {
     expect(parsedBody.contents[0].parts[0].text).toBe('create login form');
     expect(parsedBody.systemInstruction.parts[0].text).toBe('You are a meta-prompt expert');
     expect(parsedBody.generationConfig.temperature).toBe(0.4);
+  });
+
+  it('should target gemini-3.8-flash by default when no model is passed', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: 'Default model response' }] } }],
+      }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const client = new GeminiClient('dummy-gemini-key');
+    const response = await client.generatePrompt('sys', 'user');
+
+    expect(response).toBe('Default model response');
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=dummy-gemini-key'),
+      expect.any(Object)
+    );
+  });
+
+  it('should target gemini-3.8-flash when explicitly passed', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: 'Explicit model response' }] } }],
+      }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const client = new GeminiClient('dummy-gemini-key', 'gemini-3.8-flash');
+    const response = await client.generatePrompt('sys', 'user');
+
+    expect(response).toBe('Explicit model response');
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=dummy-gemini-key'),
+      expect.any(Object)
+    );
   });
 
   it('should handle streaming SSE response from Gemini when onChunk is provided', async () => {
@@ -131,7 +169,7 @@ describe('GeminiClient', () => {
     await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(/invalid or unauthorized api key/i);
   });
 
-  it('should handle 429 rate limit error', async () => {
+  it('should handle 429 rate limit error and throw GeminiRateLimitError', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 429,
@@ -140,7 +178,16 @@ describe('GeminiClient', () => {
     vi.stubGlobal('fetch', mockFetch);
 
     const client = new GeminiClient('valid-key');
-    await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(/rate limit exceeded/i);
+    let thrownError: unknown;
+    try {
+      await client.generatePrompt('sys', 'user');
+    } catch (err) {
+      thrownError = err;
+    }
+
+    expect(thrownError).toBeInstanceOf(GeminiRateLimitError);
+    expect((thrownError as Error).message).toMatch(/rate limit exceeded/i);
+    await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(GeminiRateLimitError);
   });
 
   it('should handle 404 retired or not found model error with helpful message', async () => {

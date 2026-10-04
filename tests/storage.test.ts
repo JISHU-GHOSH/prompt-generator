@@ -164,7 +164,7 @@ describe('Storage Service', () => {
       storageService;
 
     const settings = await getSettings();
-    expect(settings.provider).toBe('gemini');
+    expect(settings.provider).toBe(DEFAULT_SETTINGS.provider);
 
     const updated = await saveSettings({ temperature: 0.8 });
     expect(updated.temperature).toBe(0.8);

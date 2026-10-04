@@ -1,13 +1,15 @@
 import { AppSettings, PromptHistoryItem } from '../types';
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  provider: 'gemini',
+  provider: 'auto',
   apiKeyGemini: '',
   apiKeyOpenAI: '',
   apiKeyAnthropic: '',
-  modelGemini: 'gemini-2.5-flash',
+  apiKeyGroq: '',
+  modelGemini: 'gemini-3.8-flash',
   modelOpenAI: 'gpt-4o-mini',
   modelAnthropic: 'claude-3-5-sonnet-20241022',
+  modelGroq: 'llama-3.3-70b-versatile',
   temperature: 0.4,
   defaultPreset: 'coding-agent',
   defaultTechStack: ['React', 'TypeScript', 'Tailwind CSS'],
