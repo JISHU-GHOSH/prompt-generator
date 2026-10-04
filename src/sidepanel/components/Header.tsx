@@ -19,6 +19,8 @@ export const Header: React.FC<HeaderProps> = ({
     gemini: 'Gemini',
     openai: 'OpenAI',
     anthropic: 'Claude',
+    groq: 'Groq',
+    auto: 'Auto',
   };
 
   return (
