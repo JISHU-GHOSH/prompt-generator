@@ -92,11 +92,20 @@ export class LocalSynthesizer implements AIClient {
     }
 
     // Domain 4: General High-Precision Decomposition
-    const role = techStack
-      ? `senior software engineer and technical lead specializing in ${techStack}`
+    let detectedStack = techStack;
+    if (lowerInput.includes('python') && (!techStack || techStack.includes('React'))) {
+      detectedStack = 'Python';
+    } else if (lowerInput.includes('rust') && (!techStack || techStack.includes('React'))) {
+      detectedStack = 'Rust';
+    } else if (lowerInput.includes('go') && (!techStack || techStack.includes('React'))) {
+      detectedStack = 'Go';
+    }
+
+    const role = detectedStack
+      ? `senior software engineer and technical lead specializing in ${detectedStack}`
       : 'senior software engineer and technical architect';
 
-    const p1 = `You are a ${role} acting as technical lead. I need you to provide a comprehensive, formal breakdown of every task, architectural decision, and implementation detail required to design and build a production-grade system for: ${rawInput.replace(/^(make|build|create|write|develop|implement)\s+(an?|the)?\s*/i, '')}. Ensure every technical approach is thoroughly justified and aligned with modern industry best practices.`;
+    const p1 = `You are a ${role}. I need you to provide a comprehensive, formal breakdown of every task, architectural decision, and implementation detail required to design and build a production-grade system for: ${rawInput.replace(/^(make|build|create|write|develop|implement)\s+(an?|the)?\s*/i, '')}. Ensure every technical approach is thoroughly justified and aligned with modern industry best practices.`;
 
     const p2 = `For each component, workflow, and architectural decision you cover, explicitly explain why you selected this specific methodology, framework, or pattern over alternatives, and critically evaluate whether a superior approach exists that you are not employing—addressing the trade-offs, constraints, maintainability, scalability, and security posture that informed your choice.${
       additionalContext ? ` Integrate the following project context and constraints: ${additionalContext}.` : ''
