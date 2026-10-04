@@ -66,7 +66,7 @@ describe('GeminiClient', () => {
 
     expect(response).toBe('Optimized technical prompt');
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=dummy-gemini-key'),
+      expect.stringContaining('generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=dummy-gemini-key'),
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,6 +141,18 @@ describe('GeminiClient', () => {
 
     const client = new GeminiClient('valid-key');
     await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(/rate limit exceeded/i);
+  });
+
+  it('should handle 404 retired or not found model error with helpful message', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ error: { message: 'models/gemini-1.5-flash is not found' } }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const client = new GeminiClient('valid-key', 'gemini-1.5-flash');
+    await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(/retired by Google/i);
   });
 
   it('should handle 500 service error', async () => {

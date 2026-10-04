@@ -203,14 +203,33 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         <div>
           <label className="block text-[10px] text-slate-400 mb-1">Model</label>
           <select
-            value={modelGemini}
-            onChange={(e) => setModelGemini(e.target.value)}
+            value={
+              ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'].includes(modelGemini)
+                ? modelGemini
+                : 'custom'
+            }
+            onChange={(e) => {
+              if (e.target.value !== 'custom') {
+                setModelGemini(e.target.value);
+              }
+            }}
             className="w-full bg-slate-950/80 border border-slate-800 rounded-md px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
-            <option value="gemini-1.5-flash">gemini-1.5-flash (Fast, Generous Free Tier)</option>
-            <option value="gemini-1.5-pro">gemini-1.5-pro (Deep Reasoning)</option>
-            <option value="gemini-2.0-flash">gemini-2.0-flash (Next Gen)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash (Recommended, Generous Free Tier)</option>
+            <option value="gemini-2.0-flash">gemini-2.0-flash (Fast & Capable)</option>
+            <option value="gemini-2.5-pro">gemini-2.5-pro (Deep Reasoning)</option>
+            <option value="custom">Custom Model Name...</option>
           </select>
+
+          {!['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'].includes(modelGemini) && (
+            <input
+              type="text"
+              value={modelGemini}
+              onChange={(e) => setModelGemini(e.target.value)}
+              placeholder="e.g. gemini-2.5-flash"
+              className="mt-1.5 w-full bg-slate-950/80 border border-slate-800 rounded-md px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          )}
         </div>
       </div>
 

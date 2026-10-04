@@ -5,9 +5,9 @@ export class GeminiClient implements AIClient {
   private readonly model: string;
   private readonly temperature: number;
 
-  constructor(apiKey: string, model: string = 'gemini-1.5-flash', temperature: number = 0.4) {
+  constructor(apiKey: string, model: string = 'gemini-2.5-flash', temperature: number = 0.4) {
     this.apiKey = apiKey?.trim() || '';
-    this.model = model || 'gemini-1.5-flash';
+    this.model = model || 'gemini-2.5-flash';
     this.temperature = typeof temperature === 'number' ? temperature : 0.4;
   }
 
@@ -24,8 +24,9 @@ export class GeminiClient implements AIClient {
 
     const isStreaming = Boolean(onChunk);
     const action = isStreaming ? 'streamGenerateContent' : 'generateContent';
+    const cleanModel = (this.model || 'gemini-2.5-flash').replace(/^models\//, '');
     let url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      this.model
+      cleanModel
     )}:${action}?key=${encodeURIComponent(this.apiKey)}`;
 
     if (isStreaming) {
@@ -171,6 +172,11 @@ export class GeminiClient implements AIClient {
     if (response.status === 400) {
       throw new Error(
         `Gemini API error (400): ${errorDetail || 'Invalid request payload or model configuration.'}`
+      );
+    }
+    if (response.status === 404) {
+      throw new Error(
+        `Gemini API error (404): Model '${this.model}' not found or retired by Google. Please select 'gemini-2.5-flash' or 'gemini-2.0-flash' in Settings.`
       );
     }
     if (response.status === 401 || response.status === 403) {

@@ -5,7 +5,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   apiKeyGemini: '',
   apiKeyOpenAI: '',
   apiKeyAnthropic: '',
-  modelGemini: 'gemini-1.5-flash',
+  modelGemini: 'gemini-2.5-flash',
   modelOpenAI: 'gpt-4o-mini',
   modelAnthropic: 'claude-3-5-sonnet-20241022',
   temperature: 0.4,
