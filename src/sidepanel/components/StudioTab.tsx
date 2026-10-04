@@ -28,6 +28,7 @@ export interface StudioTabProps {
   setAdditionalContext: (val: string) => void;
   outputPrompt: string;
   setOutputPrompt: (val: string) => void;
+  activeModel?: string;
   isGenerating: boolean;
   error: string | null;
   setError: (err: string | null) => void;
@@ -63,6 +64,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
   additionalContext,
   setAdditionalContext,
   outputPrompt,
+  activeModel,
   isGenerating,
   error,
   setError,
@@ -113,7 +115,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
   return (
     <div className="space-y-4 pb-8">
       {/* Missing API Key Alert */}
-      {!hasApiKey && (
+      {!hasApiKey && activeProvider !== 'auto' && (
         <div className="flex items-start space-x-2.5 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
           <KeyRound className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
           <div className="flex-1">
@@ -333,6 +335,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
         <div className="pt-2">
           <OutputViewer
             prompt={outputPrompt}
+            activeModel={activeModel}
             isStreaming={isGenerating}
             onSendToTab={onSendToTab}
             onSave={onSave}

@@ -236,7 +236,7 @@ describe('Side Panel React Application', () => {
 
       // Click mask toggle button next to Gemini API key using aria-label
       const visibilityBtns = screen.getAllByLabelText('Toggle password visibility');
-      expect(visibilityBtns.length).toBe(3);
+      expect(visibilityBtns.length).toBe(4);
       fireEvent.click(visibilityBtns[0]);
       expect(apiKeyInput.type).toBe('text');
     });
@@ -317,6 +317,87 @@ describe('Side Panel React Application', () => {
 
       expect(screen.queryByText(/Build authentication modal/i)).not.toBeInTheDocument();
       expect(screen.getByText(/Fix memory leak in web worker/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Zero-Key Auto Failover and Model Badges', () => {
+    it('should not display missing API key alert when provider is auto', async () => {
+      render(<App />);
+
+      // Should find Studio tab active by default
+      expect(await screen.findByPlaceholderText(/Describe what you want to build/i)).toBeInTheDocument();
+
+      // No warning banners should be shown for missing API keys
+      expect(screen.queryByText(/Missing API Key/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Configure key in settings/i)).not.toBeInTheDocument();
+    });
+
+    it('should display LLaMA 3.3 70B model badge in OutputViewer after generation', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('## Enhanced System Plan');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+        getActiveModelUsed: vi.fn().mockReturnValue('llama-3.3-70b-versatile'),
+      } as any);
+
+      render(<App />);
+
+      const textarea = await screen.findByPlaceholderText(/Describe what you want to build/i);
+      fireEvent.change(textarea, { target: { value: 'Create microservice architecture' } });
+
+      const enhanceBtn = screen.getByRole('button', { name: /Promptify|Enhance/i });
+      fireEvent.click(enhanceBtn);
+
+      expect(await screen.findByText(/Enhanced System Plan/i)).toBeInTheDocument();
+      expect(screen.getByText(/LLaMA 3.3 70B/i)).toBeInTheDocument();
+    });
+
+    it('should display Gemini 3.8 Flash model badge when active model is gemini-3.8-flash', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('## Gemini Enhanced Plan');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+        getActiveModelUsed: vi.fn().mockReturnValue('gemini-3.8-flash'),
+      } as any);
+
+      render(<App />);
+
+      const textarea = await screen.findByPlaceholderText(/Describe what you want to build/i);
+      fireEvent.change(textarea, { target: { value: 'Build GraphQL server' } });
+
+      const enhanceBtn = screen.getByRole('button', { name: /Promptify|Enhance/i });
+      fireEvent.click(enhanceBtn);
+
+      expect(await screen.findByText(/Gemini Enhanced Plan/i)).toBeInTheDocument();
+      expect(screen.getByText(/Gemini 3.8 Flash/i)).toBeInTheDocument();
+    });
+
+    it('should display Offline Engine badge when fallback reaches local synthesizer', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('## Offline Synthesized Output');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+        getActiveModelUsed: vi.fn().mockReturnValue('local-synthesizer'),
+      } as any);
+
+      render(<App />);
+
+      const textarea = await screen.findByPlaceholderText(/Describe what you want to build/i);
+      fireEvent.change(textarea, { target: { value: 'Build offline calculator' } });
+
+      const enhanceBtn = screen.getByRole('button', { name: /Promptify|Enhance/i });
+      fireEvent.click(enhanceBtn);
+
+      expect(await screen.findByText(/Offline Synthesized Output/i)).toBeInTheDocument();
+      expect(screen.getByText(/Offline Engine/i)).toBeInTheDocument();
+    });
+
+    it('should display auto-failover provider option and groq section in settings tab', async () => {
+      render(<App />);
+
+      fireEvent.click(screen.getByRole('button', { name: /Settings/i }));
+
+      expect(
+        await screen.findByText(/Auto-Failover \(LLaMA 3.3 \+ Gemini 3.8 - Recommended\)/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/llama-3.3-70b-versatile/i)).toBeInTheDocument();
     });
   });
 });

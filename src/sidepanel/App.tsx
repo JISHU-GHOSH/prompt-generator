@@ -19,6 +19,7 @@ export const App: React.FC = () => {
   const [techStack, setTechStack] = useState<string[]>(DEFAULT_SETTINGS.defaultTechStack);
   const [additionalContext, setAdditionalContext] = useState('');
   const [outputPrompt, setOutputPrompt] = useState('');
+  const [activeModel, setActiveModel] = useState<string | undefined>(undefined);
   const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +49,10 @@ export const App: React.FC = () => {
 
   const hasApiKey = useMemo(() => {
     switch (settings.provider) {
+      case 'auto':
+        return true;
+      case 'groq':
+        return Boolean(settings.apiKeyGroq && settings.apiKeyGroq.trim().length > 0);
       case 'gemini':
         return Boolean(settings.apiKeyGemini && settings.apiKeyGemini.trim().length > 0);
       case 'openai':
@@ -79,8 +84,21 @@ export const App: React.FC = () => {
 
       const client = getAIClient(settings);
       const enhanced = await client.generatePrompt(compiled.systemPrompt, compiled.userPrompt);
+      const modelUsed =
+        typeof (client as any).getActiveModelUsed === 'function'
+          ? (client as any).getActiveModelUsed()
+          : settings.provider === 'gemini'
+          ? settings.modelGemini
+          : settings.provider === 'groq'
+          ? settings.modelGroq || 'llama-3.3-70b-versatile'
+          : settings.provider === 'openai'
+          ? settings.modelOpenAI
+          : settings.provider === 'anthropic'
+          ? settings.modelAnthropic
+          : undefined;
 
       setOutputPrompt(enhanced);
+      setActiveModel(modelUsed);
 
       // Save to history
       const savedItem = await storageService.addHistoryItem({
@@ -89,6 +107,7 @@ export const App: React.FC = () => {
         preset,
         techStack,
         isFavorite: false,
+        activeModelUsed: modelUsed,
       });
 
       setHistory((prev) => [savedItem, ...prev]);
@@ -150,6 +169,7 @@ export const App: React.FC = () => {
     setPreset(item.preset);
     setTechStack([...item.techStack]);
     setOutputPrompt(item.enhancedPrompt);
+    setActiveModel(item.activeModelUsed);
     setCurrentHistoryId(item.id);
     setError(null);
     setActiveTab('studio');
@@ -183,6 +203,7 @@ export const App: React.FC = () => {
         preset,
         techStack,
         isFavorite: true,
+        activeModelUsed: activeModel,
       });
       setHistory((prev) => [newItem, ...prev]);
       setCurrentHistoryId(newItem.id);
@@ -230,6 +251,7 @@ export const App: React.FC = () => {
             setAdditionalContext={setAdditionalContext}
             outputPrompt={outputPrompt}
             setOutputPrompt={setOutputPrompt}
+            activeModel={activeModel}
             isGenerating={isGenerating}
             error={error}
             setError={setError}
