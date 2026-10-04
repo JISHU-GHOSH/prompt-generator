@@ -10,16 +10,67 @@
 
 **PromptForge AI** is a privacy-first, developer-focused Google Chrome extension (Manifest V3) that turns casual, vague coding ideas into production-grade, highly structured technical prompts and architecture specifications for AI coding tools like ChatGPT, Claude, Gemini, Cursor, Copilot, and GitHub.
 
+Now featuring an **instant, zero-key multi-model failover engine**: PromptForge AI works right after installation with **no API keys required**, powered by **LLaMA 3.3 70B** with transparent self-healing failover to **Gemini 3.8 Flash**, **Gemini 2.5 Flash**, and an **Offline Deterministic Synthesizer**.
+
 ---
 
 ## 🌟 Why PromptForge AI?
 
 Vague prompts lead to hallucinated logic, missing edge cases, and incomplete boilerplate when prompting modern LLMs. **PromptForge AI** bridges this gap by acting as an intelligent prompt compilation and refinement layer:
 
+- **Zero-Key Out of the Box**: Start generating high-precision coding prompts immediately upon installation—no setup gates or required API keys.
+- **Multi-Model Self-Healing Failover**: Cascades across high-speed cloud LLMs and an offline synthesizer so your workflow is never interrupted by rate limits or network dropouts.
 - **Structure & Precision**: Enforces architectural context, technical stack constraints, edge cases, error handling, security considerations, and concrete acceptance criteria.
 - **Side Panel Workflow**: Lives right alongside your code editors and browser tabs using Chrome's native Side Panel API (`chrome.sidePanel`).
 - **In-Page Magic Wand**: Seamlessly detects prompt inputs on ChatGPT, Claude, Gemini, and GitHub, enhancing drafts in-place with a single click.
-- **100% Privacy & BYOK**: Zero third-party proxy servers. Your API keys and prompts are stored locally in your browser (`chrome.storage`) and communicate directly with official provider endpoints.
+- **100% Privacy & Optional BYOK**: Zero third-party proxy servers. Your prompts and optional custom API keys are stored locally in your browser (`chrome.storage.local`) and communicate directly with official provider endpoints.
+
+---
+
+## ⚡ Zero-Key Multi-Model Failover Architecture
+
+PromptForge AI features an autonomous, multi-tier cascade engine designed to maximize speed, quality, and reliability:
+
+```
+┌────────────────────────────────────────────────────────┐
+│               User Prompt Enhancement Request          │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+      ┌───────────────────────────────────────────┐
+      │  ⚡ Tier 1: LLaMA 3.3 70B (Groq Cloud)    │ ───► Success (Ultra-fast ~300ms)
+      │  `llama-3.3-70b-versatile`                │
+      └─────────────────────┬─────────────────────┘
+                            │ (429 Rate Limit / 5xx Error)
+                            ▼
+      ┌───────────────────────────────────────────┐
+      │  ✨ Tier 2: Gemini 3.8 Flash              │ ───► Success (Google AI Studio)
+      │  `gemini-3.8-flash`                       │
+      └─────────────────────┬─────────────────────┘
+                            │ (429 Quota / 5xx Error)
+                            ▼
+      ┌───────────────────────────────────────────┐
+      │  ✨ Tier 3: Gemini 2.5 Flash              │ ───► Success (High Quota Cloud)
+      │  `gemini-2.5-flash`                       │
+      └─────────────────────┬─────────────────────┘
+                            │ (Network Offline / Service Error)
+                            ▼
+      ┌───────────────────────────────────────────┐
+      │  🛡️ Tier 4: Offline Deterministic Engine  │ ───► Instant On-Device Spec
+      │  Zero-network structural prompt compiler  │
+      └───────────────────────────────────────────┘
+```
+
+1. ⚡ **LLaMA 3.3 70B** (`llama-3.3-70b-versatile` via Groq Cloud):
+   - **Primary Engine**: Ultra-fast inference (~300 tokens/sec), uncensored developer prompt engineering, and deep technical instruction following.
+2. ✨ **Gemini 3.8 Flash** (`gemini-3.8-flash` via Google Generative Language):
+   - **First Automatic Fallback**: Advanced multimodal reasoning model that seamlessly picks up requests if Groq encounters rate limits (HTTP 429) or transient 5xx server errors in under 50ms.
+3. ✨ **Gemini 2.5 Flash** (`gemini-2.5-flash`):
+   - **Second Automatic Fallback**: Ultra-high quota model ensuring cloud generation redundancy under heavy traffic.
+4. 🛡️ **Deterministic Offline Synthesizer**:
+   - **Zero-Network Safeguard**: Generates comprehensive, production-grade technical specs fully on-device if you are offline or all cloud networks are unreachable.
+5. 🏷️ **Real-Time Model Badges**:
+   - The Studio output viewer displays dynamic badges (e.g. `⚡ LLaMA 3.3`, `✨ Gemini 3.8`, `✨ Gemini 2.5`, or `🛡️ Local Synthesizer`) so you always know which model fulfilled your request.
 
 ---
 
@@ -34,7 +85,7 @@ Vague prompts lead to hallucinated logic, missing edge cases, and incomplete boi
   - *Database Schema & Migration*
   - *Bug Investigation & Root Cause Analysis*
   - *Refactoring & Code Modernization*
-- **Local Prompt History**: Searchable, timestamped history saved in `chrome.storage.local` with one-click copy and instant reload into the editor.
+- **Local Prompt History**: Searchable, timestamped history saved in `chrome.storage.local` with one-click copy, active model metadata, and instant reload into the editor.
 - **Copy & Export**: Instant Markdown copy to clipboard with visual toast confirmations.
 
 ### 2. 🪄 In-Page Magic Wand
@@ -45,9 +96,10 @@ Vague prompts lead to hallucinated logic, missing edge cases, and incomplete boi
   - **GitHub Discussions / Issues / PRs** (`https://github.com/*`)
 - Click the wand to compile your rough thought into an exhaustive technical prompt without ever leaving the page.
 
-### 3. 🔑 Bring Your Own Key (BYOK)
-- Connect directly to:
-  - **Google Gemini** (Gemini 1.5 Flash / Gemini 1.5 Pro) — *Generous Free Tier available!*
+### 3. 🔑 Bring Your Own Key (BYOK) — Optional Power Mode
+- While PromptForge AI works out of the box with zero keys, power users can configure custom API keys in the **Settings** tab for direct access:
+  - **Groq Cloud** (LLaMA 3.3 70B, LLaMA 3.1 8B)
+  - **Google AI Studio** (Gemini 3.8 Flash, Gemini 2.5 Flash, Gemini 2.5 Pro)
   - **OpenAI** (GPT-4o, GPT-4o-mini)
   - **Anthropic** (Claude 3.5 Sonnet, Claude 3.5 Haiku)
 - Direct HTTPS calls from the extension background service worker with zero middleman or telemetry.
@@ -56,7 +108,7 @@ Vague prompts lead to hallucinated logic, missing edge cases, and incomplete boi
 
 ## 🚀 Quick Start Guide (Load Unpacked in Chrome)
 
-Follow these steps to build and load the extension in developer mode on Google Chrome, Brave, Arc, or Microsoft Edge:
+You can load and use PromptForge AI immediately in Google Chrome, Brave, Arc, or Microsoft Edge:
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (version 18 or later recommended)
@@ -73,7 +125,7 @@ npm install
 ```bash
 npm run build
 ```
-This runs TypeScript validation (`tsc --noEmit`) and builds all extension bundles via Vite into the `dist/` directory.
+This runs TypeScript validation (`tsc --noEmit`) and compiles all extension bundles via Vite into the `dist/` directory.
 
 ### Step 3: Load into Chrome
 1. Open Google Chrome and navigate to:
@@ -82,41 +134,43 @@ This runs TypeScript validation (`tsc --noEmit`) and builds all extension bundle
    ```
 2. In the top-right corner, toggle **Developer mode** to **ON**.
 3. In the top-left corner, click the **Load unpacked** button.
-4. In the file picker dialog, navigate to your repository and select the **`dist`** directory (e.g. `c:\Users\...\prompt-generator\dist`).
+4. In the file picker dialog, select the **`dist`** directory (e.g. `c:\Users\...\prompt-generator\dist`).
 5. Click **Select Folder**.
-6. PromptForge AI is now loaded! You will see **PromptForge AI - Professional Coding Prompt Generator** in your extensions list.
+6. PromptForge AI is now loaded and ready! You will see **PromptForge AI - Professional Coding Prompt Generator** in your extensions list.
 
 ### Step 4: Pin and Open PromptForge AI
 1. Click the puzzle icon (Extensions menu) in the Chrome toolbar.
 2. Find **PromptForge AI** and click the **Pin** icon.
-3. Click the PromptForge AI icon to immediately open the Side Panel Studio, or open any supported AI web app (ChatGPT, Claude, Gemini, GitHub) to use the in-page Magic Wand.
+3. Click the PromptForge AI icon to open the Side Panel Studio.
+4. Type any rough idea (e.g. *"JWT auth with refresh tokens in FastAPI"*) and click **⚡ Enhance with AI**.
+5. **No API keys or configuration needed!** The multi-model engine will synthesize a complete technical specification in milliseconds.
 
 ---
 
-## 🔑 Getting & Configuring API Keys
+## 🔑 Optional: Configuring Personal API Keys
 
-PromptForge AI allows you to use your preferred LLM provider. We recommend **Google Gemini** because Google provides a high-quota **free tier** that does not require entering a credit card.
+If you have dedicated developer keys with higher rate limits, you can plug them into the **Settings** tab:
 
-### 1. Google Gemini (Recommended & Free)
+### 1. Groq Cloud (Free high-speed LLaMA 3.3 70B)
+1. Go to [Groq Console](https://console.groq.com/keys).
+2. Create and copy an API key (`gsk_...`).
+3. In PromptForge AI **Settings**, expand **Custom API Keys**, select **Groq**, and paste your key.
+
+### 2. Google AI Studio (Gemini 3.8 Flash / 2.5 Flash)
 1. Go to [Google AI Studio](https://aistudio.google.com/).
-2. Sign in with your Google account.
-3. Click **Get API key** in the left sidebar or top toolbar.
-4. Click **Create API key** (choose any existing Google Cloud project or create a default one).
-5. Copy your new Gemini API key.
-6. Open the PromptForge AI Side Panel, switch to the **Settings** tab.
-7. Select **Google Gemini** under AI Provider, paste your key, and click **Save Settings**.
-> **Free Tier Quota**: Google Gemini 1.5 Flash provides up to 15 Requests Per Minute (RPM), 1,000,000 Tokens Per Minute (TPM), and 1,500 Requests Per Day for free.
+2. Sign in with your Google account and click **Get API key**.
+3. Copy your Gemini API key.
+4. In PromptForge AI **Settings**, paste your key under **Google Gemini**.
 
-### 2. OpenAI (GPT-4o)
-1. Go to the [OpenAI Platform API Keys](https://platform.openai.com/api-keys).
-2. Sign in and click **Create new secret key**.
-3. Copy the key (`sk-...`).
-4. In PromptForge AI Settings, choose **OpenAI**, paste your API key, and click **Save Settings**.
+### 3. OpenAI (GPT-4o)
+1. Go to [OpenAI Platform API Keys](https://platform.openai.com/api-keys).
+2. Generate a secret key (`sk-...`).
+3. In PromptForge AI **Settings**, select **OpenAI**, paste your API key, and click **Save Settings**.
 
-### 3. Anthropic (Claude 3.5 Sonnet)
-1. Go to the [Anthropic Console](https://console.anthropic.com/).
-2. Navigate to **API Keys** and generate a new key (`sk-ant-...`).
-3. In PromptForge AI Settings, choose **Anthropic**, paste your API key, and click **Save Settings**.
+### 4. Anthropic (Claude 3.5 Sonnet)
+1. Go to [Anthropic Console](https://console.anthropic.com/).
+2. Generate a new key (`sk-ant-...`).
+3. In PromptForge AI **Settings**, select **Anthropic**, paste your API key, and click **Save Settings**.
 
 ---
 
@@ -135,18 +189,18 @@ PromptForge AI allows you to use your preferred LLM provider. We recommend **Goo
 ```bash
 npm test
 ```
-Runs 95+ unit and component tests verifying:
-- Manifest V3 configuration and asset integrity
-- Local and sync storage management
-- Meta-prompt compiler logic and token limits
-- Gemini, OpenAI, and Anthropic API clients and error handlers
-- Background Service Worker message passing and life cycle
-- Side Panel React components, tabs, history, and template selection
-- In-Page Content Script DOM injection, observers, and textarea synchronization
+Runs 138+ automated unit and component tests verifying:
+- **Failover Cascade**: Transparent switching from LLaMA 3.3 70B to Gemini 3.8, Gemini 2.5, and local synthesizer on rate limits or errors
+- **Groq & Gemini Clients**: Streaming SSE parsing, model resolution, and status code classification
+- **Manifest V3 Configuration**: Manifest validation and bundled asset integrity
+- **Background Service Worker**: Message router, model tracking, and history persistence
+- **Side Panel UI**: Zero-key studio workflow, model execution badges, templates, and history
+- **In-Page Content Script**: Wand injection, site adapters (ChatGPT, Claude, Gemini, GitHub), and input synchronization
+- **Storage Service**: Chrome storage wrapper, settings persistence, and history management
 
 ---
 
-### 📁 Project Structure
+## 📁 Project Structure
 
 ```text
 prompt-generator/
@@ -157,7 +211,7 @@ prompt-generator/
 │   └── icons/                 # Extension PNG icons (16px, 48px, 128px)
 ├── src/
 │   ├── background/
-│   │   └── service-worker.ts  # Background worker, API router & sidepanel opener
+│   │   └── service-worker.ts  # Background worker, failover router & sidepanel opener
 │   ├── content/
 │   │   ├── content-script.ts  # In-page magic wand overlay & site adapters
 │   │   └── content.css        # Animations & styles for floating wand
@@ -165,15 +219,17 @@ prompt-generator/
 │   │   ├── index.html         # HTML entry point for Chrome Side Panel
 │   │   ├── main.tsx           # React root mount
 │   │   ├── App.tsx            # Main application UI with tabs & state
-│   │   ├── components/        # Studio, Templates, History, Settings views
+│   │   ├── components/        # Studio, Templates, History, Settings, Badges
 │   │   └── index.css          # Tailwind CSS styles
 │   └── services/
-│       ├── ai/                # BYOK clients for Gemini, OpenAI & Anthropic
-│       ├── prompt-engine/     # Meta-prompt compilation & template engine
+│       ├── ai/                # FailoverRouter, Groq, Gemini, OpenAI & Anthropic clients
+│       ├── prompt-engine/     # Meta-prompt compiler & template engine
 │       └── storage.ts         # Chrome storage wrapper (chrome.storage.local)
-├── tests/                     # Comprehensive Vitest test suite
+├── tests/                     # 138+ automated Vitest tests
 │   ├── ai-client.test.ts
 │   ├── content-script.test.ts
+│   ├── failover-router.test.ts
+│   ├── groq-client.test.ts
 │   ├── manifest.test.ts
 │   ├── prompt-compiler.test.ts
 │   ├── service-worker.test.ts
@@ -194,9 +250,10 @@ prompt-generator/
 
 ## 🔒 Security & Privacy
 
-- **No Third-Party Backend**: PromptForge AI operates entirely on-device and communicates directly with official LLM endpoints.
-- **Secure Key Storage**: API keys are stored in `chrome.storage.local` within your browser's encrypted profile directory.
-- **Scoped Permissions**: Requests only `sidePanel`, `storage`, and `activeTab` permissions, plus explicitly defined host permissions for LLM provider APIs.
+- **No Third-Party Backend**: PromptForge AI operates directly from the browser to provider APIs with zero middleman proxy.
+- **Secure Key Storage**: All settings and optional API keys are stored in `chrome.storage.local` within your browser's encrypted profile directory.
+- **Zero-Key Privacy**: In default zero-key mode, prompt compilation requests flow directly to fast provider endpoints without storing any personal identifiers.
+- **Scoped Permissions**: Requests only `sidePanel`, `storage`, and `activeTab` permissions, plus explicitly defined host permissions.
 
 ---
 
