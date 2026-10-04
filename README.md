@@ -182,10 +182,26 @@ If you have dedicated developer keys with higher rate limits, you can plug them 
 
 | Command | Description |
 | :--- | :--- |
-| `npm run dev` | Starts the Vite development server |
-| `npm run build` | Compiles TypeScript and packages extension to `dist/` |
-| `npm test` | Runs the full Vitest automated test suite |
+| `npm run dev` | Starts Vite extension development server |
+| `npm run dev:web` | Starts standalone Web Studio development server (`localhost:5173`) |
+| `npm run build` | Compiles and packages Chrome Extension into `dist/` |
+| `npm run build:web` | Compiles production Web Studio into `dist-web/` |
+| `npm test` | Runs the full Vitest automated test suite (148+ tests) |
 | `npm run generate-icons` | Generates official PNG icon set in `public/icons/` |
+
+---
+
+## 🌐 Deploy as a Live Web Application (Vercel)
+
+PromptForge AI includes a full-screen, responsive **Dual-Pane Web Studio** alongside the Chrome Extension:
+
+1. Push this repository to your GitHub account (`git push origin master`).
+2. Go to [vercel.com](https://vercel.com) and click **"Add New Project"** → **Import `prompt-generator`**.
+3. Under **Environment Variables**, add:
+   * **Key**: `GROQ_API_KEY`
+   * **Value**: Your Groq API key (`gsk_...`)
+4. Click **Deploy**!
+   - Your website is instantly live at `https://your-project.vercel.app` with zero-key serverless generation powered by `openai/gpt-oss-120b`!
 
 ### Running the Test Suite
 ```bash

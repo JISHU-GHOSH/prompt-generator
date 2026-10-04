@@ -36,15 +36,33 @@ function isChromeStorageAvailable(): boolean {
   );
 }
 
+function isLocalStorageAvailable(): boolean {
+  try {
+    return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+  } catch {
+    return false;
+  }
+}
+
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
   if (isChromeStorageAvailable()) {
     try {
       const result = await chrome.storage.local.get(key);
       return result ? (result[key] as T) : undefined;
     } catch {
-      return inMemoryStore[key] as T;
+      // fallback
     }
   }
+
+  if (isLocalStorageAvailable()) {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : undefined;
+    } catch {
+      // fallback
+    }
+  }
+
   return inMemoryStore[key] as T;
 }
 
@@ -54,10 +72,19 @@ async function setStorageItem<T>(key: string, value: T): Promise<void> {
       await chrome.storage.local.set({ [key]: value });
       return;
     } catch {
-      inMemoryStore[key] = value;
-      return;
+      // fallback
     }
   }
+
+  if (isLocalStorageAvailable()) {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+      return;
+    } catch {
+      // fallback
+    }
+  }
+
   inMemoryStore[key] = value;
 }
 

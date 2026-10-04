@@ -191,4 +191,22 @@ describe('Storage Service', () => {
 
     await clearHistory();
   });
+
+  it('should fall back to window.localStorage when chrome is undefined in web mode', async () => {
+    delete (globalThis as any).chrome;
+    const localStore: Record<string, string> = {};
+    (globalThis as any).window = {
+      localStorage: {
+        getItem: (k: string) => localStore[k] || null,
+        setItem: (k: string, v: string) => {
+          localStore[k] = v;
+        },
+      },
+    };
+
+    await storageService.saveSettings({ apiKeyGroq: 'web-groq-key' });
+    const settings = await storageService.getSettings();
+    expect(settings.apiKeyGroq).toBe('web-groq-key');
+    expect(localStore['promptforge_settings']).toContain('web-groq-key');
+  });
 });

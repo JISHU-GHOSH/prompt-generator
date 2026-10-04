@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:web": "vite --config vite.config.web.ts",
     "build": "tsc --noEmit && vite build",
+    "build:web": "tsc --noEmit && vite build --config vite.config.web.ts",
     "generate-icons": "node scripts/generate-icons.js",
     "test": "vitest run",
     "test:dist": "vitest run tests/manifest.test.ts"
