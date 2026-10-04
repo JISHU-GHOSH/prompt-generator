@@ -175,4 +175,35 @@ describe('GroqClient', () => {
     expect(onChunk).toHaveBeenCalledWith('Start ');
     expect(onChunk).toHaveBeenCalledWith('End');
   });
+
+  it('should fall back to alternative model when primary model gives 404 does not exist', async () => {
+    let callCount = 0;
+    const mockFetch = vi.fn().mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) {
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            error: { message: 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.' },
+          }),
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          choices: [{ message: { content: 'Fallback model response' } }],
+        }),
+      };
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const client = new GroqClient('gsk_test_key', 'llama-3.3-70b-versatile');
+    const result = await client.generatePrompt('system', 'user');
+
+    expect(result).toBe('Fallback model response');
+    expect(client.getActiveModel()).toBe('openai/gpt-oss-120b');
+    expect(callCount).toBe(2);
+  });
 });

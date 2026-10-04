@@ -16,6 +16,10 @@ export function isFailoverError(error: unknown): boolean {
     '500',
     '502',
     '503',
+    '404',
+    'does not exist',
+    'do not have access',
+    'not found',
     'rate limit',
     'resourceexhausted',
     'failed to fetch',
@@ -204,6 +208,9 @@ export class FailoverRouter implements AIClient {
 
       try {
         const result = await candidate.client.generatePrompt(systemPrompt, userPrompt, onChunk);
+        if (typeof (candidate.client as any).getActiveModel === 'function') {
+          this.activeModelUsed = (candidate.client as any).getActiveModel();
+        }
         return result;
       } catch (err: unknown) {
         if (!isFailoverError(err)) {

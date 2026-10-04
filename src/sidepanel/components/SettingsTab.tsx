@@ -347,7 +347,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <label className="block text-[10px] text-slate-400 mb-1">Model</label>
           <select
             value={
-              ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'].includes(modelGroq)
+              ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b', 'llama-3.1-8b-instant'].includes(modelGroq)
                 ? modelGroq
                 : 'custom'
             }
@@ -358,12 +358,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             }}
             className="w-full bg-slate-950/80 border border-slate-800 rounded-md px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
+            <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (State-of-the-Art 120B Reasoning)</option>
             <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Ultra-fast 70B LLaMA)</option>
-            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Fastest)</option>
+            <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (27B Fast Coder)</option>
+            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Fastest 8B)</option>
             <option value="custom">Custom Model Name...</option>
           </select>
 
-          {!['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'].includes(modelGroq) && (
+          {!['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b', 'llama-3.1-8b-instant'].includes(modelGroq) && (
             <input
               type="text"
               value={modelGroq}

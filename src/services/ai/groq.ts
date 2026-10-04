@@ -8,10 +8,18 @@ export class RateLimitError extends Error {
   }
 }
 
+export const GROQ_FALLBACK_MODELS = [
+  'openai/gpt-oss-120b',
+  'llama-3.3-70b-versatile',
+  'qwen/qwen3.8-27b',
+  'llama-3.1-8b-instant',
+];
+
 export class GroqClient implements AIClient {
   private readonly apiKey: string;
   private readonly model: string;
   private readonly temperature: number;
+  private activeModel: string;
 
   constructor(
     apiKey: string = '',
@@ -20,7 +28,12 @@ export class GroqClient implements AIClient {
   ) {
     this.apiKey = apiKey?.trim() || '';
     this.model = model || 'llama-3.3-70b-versatile';
+    this.activeModel = this.model;
     this.temperature = typeof temperature === 'number' ? temperature : 0.4;
+  }
+
+  getActiveModel(): string {
+    return this.activeModel;
   }
 
   async generatePrompt(
@@ -34,6 +47,38 @@ export class GroqClient implements AIClient {
       );
     }
 
+    const candidateModels = Array.from(new Set([this.model, ...GROQ_FALLBACK_MODELS]));
+    let lastError: Error | null = null;
+
+    for (const modelToTry of candidateModels) {
+      try {
+        const result = await this.executeChatCompletion(modelToTry, systemPrompt, userPrompt, onChunk);
+        this.activeModel = modelToTry;
+        return result;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (
+          msg.includes('does not exist') ||
+          msg.includes('do not have access') ||
+          msg.includes('404')
+        ) {
+          console.warn(`[GroqClient] Model ${modelToTry} unavailable (${msg}), attempting next candidate...`);
+          lastError = err instanceof Error ? err : new Error(msg);
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    throw lastError || new Error('Groq API error: None of the candidate models were available.');
+  }
+
+  private async executeChatCompletion(
+    model: string,
+    systemPrompt: string,
+    userPrompt: string,
+    onChunk?: (chunk: string) => void
+  ): Promise<string> {
     const isStreaming = Boolean(onChunk);
     const messages: Array<{ role: string; content: string }> = [];
 
@@ -43,7 +88,7 @@ export class GroqClient implements AIClient {
     messages.push({ role: 'user', content: userPrompt });
 
     const payload: Record<string, unknown> = {
-      model: this.model,
+      model,
       messages,
       temperature: this.temperature,
       stream: isStreaming,
@@ -65,7 +110,7 @@ export class GroqClient implements AIClient {
     }
 
     if (!response.ok) {
-      await this.handleError(response);
+      await this.handleError(response, model);
     }
 
     if (isStreaming && response.body && typeof response.body.getReader === 'function') {
@@ -146,7 +191,7 @@ export class GroqClient implements AIClient {
     return accumulatedText;
   }
 
-  private async handleError(response: Response): Promise<never> {
+  private async handleError(response: Response, model: string): Promise<never> {
     let errorDetail = '';
     try {
       const json = await response.json();
@@ -161,12 +206,17 @@ export class GroqClient implements AIClient {
 
     if (response.status === 429) {
       throw new RateLimitError(
-        errorDetail || `Rate limit reached for model ${this.model}`
+        errorDetail || `Rate limit reached for model ${model}`
       );
     }
     if (response.status === 401) {
       throw new Error(
         `Groq API error (401): Invalid API key or unauthorized. ${errorDetail || 'Please verify your Groq API key in settings.'}`
+      );
+    }
+    if (response.status === 404 || errorDetail.includes('does not exist') || errorDetail.includes('do not have access')) {
+      throw new Error(
+        `Groq API error (404): The model \`${model}\` does not exist or you do not have access to it. ${errorDetail}`
       );
     }
     if (response.status >= 500) {

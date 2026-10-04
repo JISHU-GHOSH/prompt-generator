@@ -22,6 +22,22 @@ export const renderModelBadge = (model?: string) => {
     );
   }
 
+  if (lower.includes('120b') || lower.includes('gpt-oss')) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 shadow-sm">
+        ⚡ GPT-OSS 120B (Groq)
+      </span>
+    );
+  }
+
+  if (lower.includes('qwen')) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-950/80 text-teal-300 border border-teal-800/60 shadow-sm">
+        ⚡ Qwen 3.8 27B (Groq)
+      </span>
+    );
+  }
+
   if (lower.includes('8b')) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-950/80 text-purple-300 border border-purple-800/60 shadow-sm">
