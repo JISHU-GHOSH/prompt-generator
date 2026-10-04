@@ -129,6 +129,24 @@ export class AnthropicClient implements AIClient {
           }
         }
       }
+
+      if (buffer.trim().startsWith('data:')) {
+        const dataStr = buffer.trim().slice(5).trim();
+        try {
+          const parsed = JSON.parse(dataStr);
+          if (
+            parsed?.type === 'content_block_delta' &&
+            parsed.delta?.type === 'text_delta' &&
+            typeof parsed.delta?.text === 'string'
+          ) {
+            const textDelta = parsed.delta.text;
+            accumulatedText += textDelta;
+            onChunk(textDelta);
+          }
+        } catch {
+          // Skip invalid JSON lines
+        }
+      }
     } finally {
       if (typeof reader.releaseLock === 'function') {
         reader.releaseLock();
@@ -154,6 +172,11 @@ export class AnthropicClient implements AIClient {
     if (response.status === 401) {
       throw new Error(
         `Anthropic API error (401): Invalid API key or unauthorized. Please check your Anthropic API key in settings.`
+      );
+    }
+    if (response.status === 403) {
+      throw new Error(
+        `Anthropic API Access Forbidden (403): Verify that your API key has appropriate permissions and credits.`
       );
     }
     if (response.status === 429) {

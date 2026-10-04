@@ -7,14 +7,25 @@ import { storageService, DEFAULT_SETTINGS } from '../src/services/storage';
 import * as clientFactory from '../src/services/ai/client-factory';
 
 describe('Side Panel React Application', () => {
+  let mockStorage: Record<string, any> = {};
+
   beforeEach(() => {
     vi.restoreAllMocks();
+    mockStorage = {};
     // Setup Chrome API mocks
     (globalThis as any).chrome = {
       storage: {
         local: {
-          get: vi.fn(async () => ({})),
-          set: vi.fn(async () => {}),
+          get: vi.fn(async (keys) => {
+            if (typeof keys === 'string') return { [keys]: mockStorage[keys] };
+            if (Array.isArray(keys)) {
+              return keys.reduce((acc, k) => ({ ...acc, [k]: mockStorage[k] }), {});
+            }
+            return mockStorage;
+          }),
+          set: vi.fn(async (items) => {
+            Object.assign(mockStorage, items);
+          }),
         },
       },
       runtime: {
@@ -135,8 +146,22 @@ describe('Side Panel React Application', () => {
       fireEvent.click(copyBtn);
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('# Compiled Prompt Result');
 
+      // Test Save prompt button
+      const saveBtn = screen.getByRole('button', { name: /Save prompt/i });
+      fireEvent.click(saveBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText('Saved')).toBeInTheDocument();
+      });
+
+      // Clicking save button again should toggle favorite back to false
+      fireEvent.click(saveBtn);
+      await waitFor(() => {
+        expect(screen.getByText('Save')).toBeInTheDocument();
+      });
+
       // Test Send to Tab button
-      const sendBtn = screen.getByRole('button', { name: /Send to Tab|Insert/i });
+      const sendBtn = screen.getByRole('button', { name: /Send/i });
       fireEvent.click(sendBtn);
 
       await waitFor(() => {
@@ -209,15 +234,11 @@ describe('Side Panel React Application', () => {
       const apiKeyInput = (await screen.findByPlaceholderText(/Enter Gemini API Key/i)) as HTMLInputElement;
       expect(apiKeyInput.type).toBe('password');
 
-      // Click mask toggle button next to Gemini API key
-      const toggleButtons = screen.getAllByRole('button');
-      // Find button containing eye icon
-      const eyeBtn = toggleButtons.find((btn) => btn.querySelector('svg.lucide-eye'));
-      expect(eyeBtn).toBeDefined();
-      if (eyeBtn) {
-        fireEvent.click(eyeBtn);
-        expect(apiKeyInput.type).toBe('text');
-      }
+      // Click mask toggle button next to Gemini API key using aria-label
+      const visibilityBtns = screen.getAllByLabelText('Toggle password visibility');
+      expect(visibilityBtns.length).toBe(3);
+      fireEvent.click(visibilityBtns[0]);
+      expect(apiKeyInput.type).toBe('text');
     });
 
     it('should reset settings to default values', async () => {

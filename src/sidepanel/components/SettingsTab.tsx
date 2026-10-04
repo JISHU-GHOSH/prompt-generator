@@ -191,6 +191,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setShowGeminiKey(!showGeminiKey)}
+            title="Toggle password visibility"
+            aria-label="Toggle password visibility"
             className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200"
           >
             {showGeminiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -245,6 +247,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setShowOpenAIKey(!showOpenAIKey)}
+            title="Toggle password visibility"
+            aria-label="Toggle password visibility"
             className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200"
           >
             {showOpenAIKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -299,6 +303,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setShowAnthropicKey(!showAnthropicKey)}
+            title="Toggle password visibility"
+            aria-label="Toggle password visibility"
             className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200"
           >
             {showAnthropicKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -376,6 +382,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           type="button"
           onClick={handleReset}
           title="Reset to defaults"
+          aria-label="Reset to defaults"
           className="py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/60 font-medium text-xs flex items-center space-x-1 transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />

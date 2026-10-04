@@ -19,6 +19,7 @@ export const App: React.FC = () => {
   const [techStack, setTechStack] = useState<string[]>(DEFAULT_SETTINGS.defaultTechStack);
   const [additionalContext, setAdditionalContext] = useState('');
   const [outputPrompt, setOutputPrompt] = useState('');
+  const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,6 +92,7 @@ export const App: React.FC = () => {
       });
 
       setHistory((prev) => [savedItem, ...prev]);
+      setCurrentHistoryId(savedItem.id);
     } catch (err: any) {
       console.error('Generation failed', err);
       setError(err?.message || 'Failed to generate prompt. Please verify your API key and network.');
@@ -148,6 +150,7 @@ export const App: React.FC = () => {
     setPreset(item.preset);
     setTechStack([...item.techStack]);
     setOutputPrompt(item.enhancedPrompt);
+    setCurrentHistoryId(item.id);
     setError(null);
     setActiveTab('studio');
   };
@@ -156,6 +159,34 @@ export const App: React.FC = () => {
     await storageService.toggleFavorite(id);
     const updated = await storageService.getHistory();
     setHistory(updated);
+  };
+
+  const currentHistoryItem = useMemo(() => {
+    if (currentHistoryId) {
+      const match = history.find((h) => h.id === currentHistoryId);
+      if (match) return match;
+    }
+    if (outputPrompt) {
+      return history.find((h) => h.enhancedPrompt === outputPrompt) || null;
+    }
+    return null;
+  }, [currentHistoryId, history, outputPrompt]);
+
+  const handleSaveCurrentPrompt = async () => {
+    if (!outputPrompt) return;
+    if (currentHistoryItem) {
+      await handleToggleFavorite(currentHistoryItem.id);
+    } else {
+      const newItem = await storageService.addHistoryItem({
+        rawInput: rawInput.trim() || 'Custom Prompt',
+        enhancedPrompt: outputPrompt,
+        preset,
+        techStack,
+        isFavorite: true,
+      });
+      setHistory((prev) => [newItem, ...prev]);
+      setCurrentHistoryId(newItem.id);
+    }
   };
 
   const handleDeleteHistory = async (id: string) => {
@@ -207,6 +238,8 @@ export const App: React.FC = () => {
             onNavigateToSettings={() => setActiveTab('settings')}
             hasApiKey={hasApiKey}
             activeProvider={settings.provider}
+            onSave={handleSaveCurrentPrompt}
+            isSaved={Boolean(currentHistoryItem?.isFavorite)}
           />
         )}
 

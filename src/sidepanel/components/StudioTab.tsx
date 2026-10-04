@@ -36,6 +36,8 @@ export interface StudioTabProps {
   onNavigateToSettings: () => void;
   hasApiKey: boolean;
   activeProvider: ProviderType;
+  onSave?: () => Promise<void> | void;
+  isSaved?: boolean;
 }
 
 const COMMON_TECH_SUGGESTIONS = [
@@ -69,6 +71,8 @@ export const StudioTab: React.FC<StudioTabProps> = ({
   onNavigateToSettings,
   hasApiKey,
   activeProvider,
+  onSave,
+  isSaved = false,
 }) => {
   const [newTagInput, setNewTagInput] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -134,6 +138,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
           </div>
           <button
             onClick={() => setError(null)}
+            aria-label="Dismiss error"
             className="text-rose-400 hover:text-rose-200 ml-2"
           >
             <X className="w-3.5 h-3.5" />
@@ -188,6 +193,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
           {rawInput && (
             <button
               onClick={() => setRawInput('')}
+              aria-label="Clear raw input"
               className="text-[11px] text-slate-500 hover:text-slate-300 flex items-center space-x-1"
             >
               <RotateCcw className="w-3 h-3" />
@@ -329,6 +335,8 @@ export const StudioTab: React.FC<StudioTabProps> = ({
             prompt={outputPrompt}
             isStreaming={isGenerating}
             onSendToTab={onSendToTab}
+            onSave={onSave}
+            isSaved={isSaved}
           />
         </div>
       )}

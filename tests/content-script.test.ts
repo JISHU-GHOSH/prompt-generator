@@ -331,4 +331,34 @@ describe('Content Script In-Page Utilities', () => {
       cleanup();
     });
   });
+
+  describe('setupContentScript and MutationObserver', () => {
+    it('should debounce MutationObserver callback before attaching wand', async () => {
+      document.body.innerHTML = '<div>No input initially</div>';
+      const cleanup = setupContentScript();
+
+      expect(document.querySelector('.promtify-wand-btn')).toBeNull();
+
+      // Rapidly mutate DOM multiple times (simulating streaming tokens)
+      for (let i = 0; i < 5; i++) {
+        const div = document.createElement('div');
+        div.textContent = `token ${i}`;
+        document.body.appendChild(div);
+      }
+
+      const input = document.createElement('textarea');
+      input.id = 'prompt-textarea';
+      document.body.appendChild(input);
+
+      // Immediately after mutation, debounce timer is pending
+      expect(document.querySelector('.promtify-wand-btn')).toBeNull();
+
+      // Wait for debounce timer (200ms + margin)
+      await new Promise((r) => setTimeout(r, 260));
+
+      expect(document.querySelector('.promtify-wand-btn')).not.toBeNull();
+
+      cleanup();
+    });
+  });
 });

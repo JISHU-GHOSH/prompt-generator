@@ -146,4 +146,49 @@ describe('Storage Service', () => {
     await storageService.deleteHistoryItem(item.id);
     expect((await storageService.getHistory()).length).toBe(0);
   });
+
+  it('should defensively copy defaultTechStack so mutations do not affect DEFAULT_SETTINGS', async () => {
+    const originalLength = DEFAULT_SETTINGS.defaultTechStack.length;
+    const settings = await storageService.getSettings();
+    settings.defaultTechStack.push('NewFramework');
+
+    expect(DEFAULT_SETTINGS.defaultTechStack.length).toBe(originalLength);
+    expect(DEFAULT_SETTINGS.defaultTechStack).not.toContain('NewFramework');
+
+    const freshSettings = await storageService.getSettings();
+    expect(freshSettings.defaultTechStack).not.toContain('NewFramework');
+  });
+
+  it('should function properly when storageService methods are destructured', async () => {
+    const { getSettings, saveSettings, getHistory, addHistoryItem, toggleFavorite, deleteHistoryItem, clearHistory } =
+      storageService;
+
+    const settings = await getSettings();
+    expect(settings.provider).toBe('gemini');
+
+    const updated = await saveSettings({ temperature: 0.8 });
+    expect(updated.temperature).toBe(0.8);
+
+    const item = await addHistoryItem({
+      rawInput: 'destructured prompt',
+      enhancedPrompt: 'enhanced',
+      preset: 'coding-agent',
+      techStack: [],
+      isFavorite: false,
+    });
+    expect(item.id).toBeDefined();
+
+    let hist = await getHistory();
+    expect(hist.length).toBe(1);
+
+    await toggleFavorite(item.id);
+    hist = await getHistory();
+    expect(hist[0].isFavorite).toBe(true);
+
+    await deleteHistoryItem(item.id);
+    hist = await getHistory();
+    expect(hist.length).toBe(0);
+
+    await clearHistory();
+  });
 });

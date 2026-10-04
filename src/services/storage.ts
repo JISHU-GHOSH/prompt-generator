@@ -73,62 +73,73 @@ export interface StorageServiceInterface {
 }
 
 export const storageService: StorageServiceInterface = {
-  async getSettings(): Promise<AppSettings> {
+  getSettings: async (): Promise<AppSettings> => {
     const stored = await getStorageItem<Partial<AppSettings>>(STORAGE_KEYS.SETTINGS);
     if (!stored) {
-      return { ...DEFAULT_SETTINGS };
+      return {
+        ...DEFAULT_SETTINGS,
+        defaultTechStack: [...DEFAULT_SETTINGS.defaultTechStack],
+      };
     }
     return {
       ...DEFAULT_SETTINGS,
       ...stored,
+      defaultTechStack: stored.defaultTechStack
+        ? [...stored.defaultTechStack]
+        : [...DEFAULT_SETTINGS.defaultTechStack],
     };
   },
 
-  async saveSettings(settings: Partial<AppSettings>): Promise<AppSettings> {
-    const current = await this.getSettings();
+  saveSettings: async (settings: Partial<AppSettings>): Promise<AppSettings> => {
+    const current = await storageService.getSettings();
     const updated: AppSettings = {
       ...current,
       ...settings,
+      defaultTechStack: settings.defaultTechStack
+        ? [...settings.defaultTechStack]
+        : current.defaultTechStack
+        ? [...current.defaultTechStack]
+        : [...DEFAULT_SETTINGS.defaultTechStack],
     };
     await setStorageItem(STORAGE_KEYS.SETTINGS, updated);
     return updated;
   },
 
-  async getHistory(): Promise<PromptHistoryItem[]> {
+  getHistory: async (): Promise<PromptHistoryItem[]> => {
     const stored = await getStorageItem<PromptHistoryItem[]>(STORAGE_KEYS.HISTORY);
     return Array.isArray(stored) ? stored : [];
   },
 
-  async addHistoryItem(
+  addHistoryItem: async (
     item: Omit<PromptHistoryItem, 'id' | 'timestamp'>
-  ): Promise<PromptHistoryItem> {
+  ): Promise<PromptHistoryItem> => {
     const newItem: PromptHistoryItem = {
       ...item,
       id: generateId(),
       timestamp: Date.now(),
     };
 
-    const currentHistory = await this.getHistory();
+    const currentHistory = await storageService.getHistory();
     const updatedHistory = [newItem, ...currentHistory].slice(0, MAX_HISTORY_ITEMS);
     await setStorageItem(STORAGE_KEYS.HISTORY, updatedHistory);
     return newItem;
   },
 
-  async toggleFavorite(id: string): Promise<void> {
-    const currentHistory = await this.getHistory();
+  toggleFavorite: async (id: string): Promise<void> => {
+    const currentHistory = await storageService.getHistory();
     const updatedHistory = currentHistory.map((item) =>
       item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
     );
     await setStorageItem(STORAGE_KEYS.HISTORY, updatedHistory);
   },
 
-  async deleteHistoryItem(id: string): Promise<void> {
-    const currentHistory = await this.getHistory();
+  deleteHistoryItem: async (id: string): Promise<void> => {
+    const currentHistory = await storageService.getHistory();
     const updatedHistory = currentHistory.filter((item) => item.id !== id);
     await setStorageItem(STORAGE_KEYS.HISTORY, updatedHistory);
   },
 
-  async clearHistory(): Promise<void> {
+  clearHistory: async (): Promise<void> => {
     await setStorageItem(STORAGE_KEYS.HISTORY, []);
   },
 };

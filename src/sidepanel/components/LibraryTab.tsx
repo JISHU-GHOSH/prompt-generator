@@ -158,6 +158,7 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
         {history.length > 0 && (
           <button
             onClick={onClearAll}
+            aria-label="Clear all history"
             className="text-[11px] text-slate-500 hover:text-rose-400 transition-colors"
           >
             Clear All
@@ -184,6 +185,7 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
                 <button
                   onClick={() => onToggleFavorite(item.id)}
                   title={item.isFavorite ? 'Remove favorite' : 'Add to favorites'}
+                  aria-label={item.isFavorite ? 'Remove favorite' : 'Add to favorites'}
                   className="p-1 rounded text-slate-400 hover:text-amber-400 transition-colors"
                 >
                   <Star
@@ -197,6 +199,7 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
                 <button
                   onClick={() => onDelete(item.id)}
                   title="Delete item"
+                  aria-label="Delete prompt"
                   className="p-1 rounded text-slate-400 hover:text-rose-400 transition-colors opacity-70 group-hover:opacity-100"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -227,6 +230,8 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
             <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
               <button
                 onClick={() => handleCopy(item.id, item.enhancedPrompt)}
+                title="Copy prompt"
+                aria-label="Copy prompt to clipboard"
                 className="flex items-center space-x-1 text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
               >
                 {copiedId === item.id ? (
@@ -244,6 +249,8 @@ export const LibraryTab: React.FC<LibraryTabProps> = ({
 
               <button
                 onClick={() => onLoadIntoStudio(item)}
+                title="Load into Studio"
+                aria-label="Load into Studio"
                 className="flex items-center space-x-1 px-2.5 py-1 rounded bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-[11px] font-medium transition-colors"
               >
                 <span>Load into Studio</span>

@@ -5,7 +5,7 @@ export interface OutputViewerProps {
   prompt: string;
   isStreaming?: boolean;
   onSendToTab?: () => Promise<boolean | void> | void;
-  onSave?: () => void;
+  onSave?: () => Promise<void> | void;
   isSaved?: boolean;
 }
 
@@ -67,12 +67,17 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
             <button
               onClick={onSave}
               title={isSaved ? 'Saved in library' : 'Save to library'}
-              className="flex items-center space-x-1 px-2 py-1 rounded text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              aria-label="Save prompt"
+              className={`flex items-center space-x-1 px-2 py-1 rounded text-xs transition-colors ${
+                isSaved
+                  ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-500/20'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
+              }`}
             >
               {isSaved ? (
                 <>
                   <BookmarkCheck className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-[11px]">Saved</span>
+                  <span className="text-[11px] font-medium text-amber-300">Saved</span>
                 </>
               ) : (
                 <>
@@ -85,6 +90,8 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
 
           <button
             onClick={handleCopy}
+            title="Copy to clipboard"
+            aria-label="Copy prompt to clipboard"
             className={`flex items-center space-x-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
               copied
                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
@@ -108,6 +115,8 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
             <button
               onClick={handleSend}
               disabled={sentStatus === 'sending'}
+              title="Send to active tab"
+              aria-label="Send prompt to active tab"
               className={`flex items-center space-x-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                 sentStatus === 'sent'
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'

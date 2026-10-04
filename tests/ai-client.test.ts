@@ -359,4 +359,53 @@ describe('AnthropicClient', () => {
     const client = new AnthropicClient('valid-key');
     await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(/rate limit exceeded/i);
   });
+
+  it('should handle 403 access forbidden error', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({ error: { type: 'permission_error', message: 'Forbidden' } }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const client = new AnthropicClient('valid-key');
+    await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(
+      /Anthropic API Access Forbidden \(403\): Verify that your API key has appropriate permissions and credits\./i
+    );
+  });
+
+  it('should flush trailing SSE buffer when stream ends without trailing newline', async () => {
+    // Second chunk does NOT end with a newline
+    const sseChunks = [
+      'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Start "}}\n\n',
+      'data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"End"}}',
+    ];
+
+    let chunkIndex = 0;
+    const mockStream = {
+      getReader: () => ({
+        read: vi.fn().mockImplementation(async () => {
+          if (chunkIndex < sseChunks.length) {
+            const encoder = new TextEncoder();
+            const chunk = encoder.encode(sseChunks[chunkIndex++]);
+            return { done: false, value: chunk };
+          }
+          return { done: true, value: undefined };
+        }),
+      }),
+    };
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: mockStream,
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const client = new AnthropicClient('sk-ant-key');
+    const chunks: string[] = [];
+    const fullText = await client.generatePrompt('sys', 'user', (c) => chunks.push(c));
+
+    expect(chunks).toEqual(['Start ', 'End']);
+    expect(fullText).toBe('Start End');
+  });
 });

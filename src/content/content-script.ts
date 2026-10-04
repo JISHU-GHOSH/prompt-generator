@@ -460,11 +460,18 @@ export function setupContentScript(): () => void {
   }
 
   // MutationObserver for single-page applications (ChatGPT, Claude, Gemini)
+  let observerDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   const observer = new MutationObserver(() => {
-    const input = findPromptInput();
-    if (input) {
-      attachWandToElement(input);
+    if (observerDebounceTimer) {
+      clearTimeout(observerDebounceTimer);
     }
+    observerDebounceTimer = setTimeout(() => {
+      const input = findPromptInput();
+      if (input) {
+        attachWandToElement(input);
+      }
+      observerDebounceTimer = null;
+    }, 200);
   });
 
   const rootToObserve = document.body || document.documentElement;
@@ -513,6 +520,10 @@ export function setupContentScript(): () => void {
   }
 
   return () => {
+    if (observerDebounceTimer) {
+      clearTimeout(observerDebounceTimer);
+      observerDebounceTimer = null;
+    }
     observer.disconnect();
     document.removeEventListener('focusin', onFocusIn);
     window.removeEventListener('keydown', handleKeyDown);
