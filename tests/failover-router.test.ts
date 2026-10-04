@@ -120,7 +120,7 @@ describe('FailoverRouter', () => {
     expect(router.getActiveModelUsed()).toBe('local-synthesizer');
     expect(onModelSwitch).toHaveBeenCalledWith('local-synthesizer', expect.any(String));
     expect(result).toContain('You are a senior software engineer');
-    expect(result).toContain('Build a responsive navbar in React');
+    expect(result).toContain('responsive navbar in React');
     expect(result).toContain('For each component, workflow, and architectural decision');
     expect(result).toContain('Structure your guidance around clear implementation phases');
   });
@@ -320,18 +320,44 @@ describe('isFailoverError', () => {
 });
 
 describe('LocalSynthesizer', () => {
-  it('should generate structured Promptify AI prompt from user input and tech stack', async () => {
+  it('should generate structured Promptify AI prompt for auth domain', async () => {
     const synth = new LocalSynthesizer();
     const prompt = await synth.generatePrompt(
       'System persona instructions',
       '## Raw User Request\nCreate an authentication modal\n\n## Target Tech Stack\n- React\n- TypeScript\n- Tailwind CSS'
     );
 
-    expect(prompt).toContain('You are a senior software engineer');
-    expect(prompt).toContain('Create an authentication modal');
+    expect(prompt).toContain('You are a principal security architect');
+    expect(prompt).toContain('Argon2id');
     expect(prompt).toContain('React, TypeScript, Tailwind CSS');
-    expect(prompt).toContain('For each component, workflow, and architectural decision');
-    expect(prompt).toContain('Structure your guidance around clear implementation phases');
+    expect(prompt).toContain('Structure your implementation around clear phases');
+  });
+
+  it('should generate deep specialized prompt for weather app without quoting input in quotes', async () => {
+    const synth = new LocalSynthesizer();
+    const prompt = await synth.generatePrompt(
+      'System persona instructions',
+      '## Raw User Request\nmake an python app to monitor weather'
+    );
+
+    expect(prompt).toContain('senior Python software engineer and distributed telemetry architect');
+    expect(prompt).toContain('weather monitoring daemon in Python');
+    expect(prompt).toContain('Pydantic v2');
+    expect(prompt).toContain('Open-Meteo');
+    expect(prompt).not.toContain('objective: "make an python app to monitor weather"');
+  });
+
+  it('should route through proxyClient when provided and functional', async () => {
+    const mockProxy = {
+      generatePrompt: vi.fn().mockResolvedValue('Enhanced via proxy'),
+    };
+    const router = new FailoverRouter({
+      proxyClient: mockProxy as any,
+    });
+
+    const result = await router.generatePrompt('sys', 'Build a task scheduler');
+    expect(result).toBe('Enhanced via proxy');
+    expect(router.getActiveModelUsed()).toBe('llama-3.3-70b-versatile (Proxy)');
   });
 
   it('should invoke onChunk callback when provided', async () => {

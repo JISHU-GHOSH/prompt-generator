@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   modelOpenAI: 'gpt-4o-mini',
   modelAnthropic: 'claude-3-5-sonnet-20241022',
   modelGroq: 'llama-3.3-70b-versatile',
+  proxyUrl: '',
   temperature: 0.4,
   defaultPreset: 'coding-agent',
   defaultTechStack: ['React', 'TypeScript', 'Tailwind CSS'],

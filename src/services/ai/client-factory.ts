@@ -40,6 +40,7 @@ export function getAIClient(settings: AppSettings): AIClient {
       );
     case 'auto':
       return new FailoverRouter({
+        proxyUrl: settings.proxyUrl,
         apiKeyGroq: settings.apiKeyGroq,
         apiKeyGemini: settings.apiKeyGemini,
         temperature: settings.temperature,

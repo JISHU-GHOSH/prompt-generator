@@ -14,6 +14,14 @@ export const renderModelBadge = (model?: string) => {
   if (!model) return null;
   const lower = model.toLowerCase();
 
+  if (lower.includes('proxy')) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 shadow-sm">
+        🌐 LLaMA 3.3 (Proxy)
+      </span>
+    );
+  }
+
   if (lower.includes('8b')) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-950/80 text-purple-300 border border-purple-800/60 shadow-sm">

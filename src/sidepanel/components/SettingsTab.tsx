@@ -34,6 +34,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [modelAnthropic, setModelAnthropic] = useState(settings.modelAnthropic);
   const [temperature, setTemperature] = useState(settings.temperature);
   const [defaultPreset, setDefaultPreset] = useState<PresetType>(settings.defaultPreset);
+  const [proxyUrl, setProxyUrl] = useState(settings.proxyUrl || '');
 
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [showGroqKey, setShowGroqKey] = useState(false);
@@ -53,6 +54,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         apiKeyGroq: apiKeyGroq.trim(),
         apiKeyOpenAI: apiKeyOpenAI.trim(),
         apiKeyAnthropic: apiKeyAnthropic.trim(),
+        proxyUrl: proxyUrl.trim(),
         modelGemini,
         modelGroq,
         modelOpenAI,
@@ -75,6 +77,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     setApiKeyGroq('');
     setApiKeyOpenAI('');
     setApiKeyAnthropic('');
+    setProxyUrl('');
     setModelGemini(DEFAULT_SETTINGS.modelGemini);
     setModelGroq(DEFAULT_SETTINGS.modelGroq || 'llama-3.3-70b-versatile');
     setModelOpenAI(DEFAULT_SETTINGS.modelOpenAI);
@@ -484,6 +487,27 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             <option value="claude-3-opus-20240229">claude-3-opus-20240229</option>
           </select>
         </div>
+      </div>
+
+      {/* Cloud Relay Proxy (Optional Zero-Key Engine) */}
+      <div className="p-3 rounded-lg border border-slate-800/80 bg-slate-900/30 space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-[11px] font-semibold text-slate-300">
+            Cloud Relay URL (Optional Zero-Key Mode)
+          </label>
+          <span className="text-[10px] text-indigo-400 font-mono">Cloudflare Worker</span>
+        </div>
+        <p className="text-[11px] text-slate-400 leading-relaxed">
+          Provide your deployed worker endpoint to generate prompts via hosted LLaMA 3.3 without storing API keys in Chrome. Leave blank to use direct BYOK or the built-in offline engine.
+        </p>
+        <input
+          type="url"
+          value={proxyUrl}
+          onChange={(e) => setProxyUrl(e.target.value)}
+          placeholder="https://promptforge-proxy.your-subdomain.workers.dev"
+          aria-label="Cloud Relay Proxy URL"
+          className="w-full bg-slate-950/80 border border-slate-800 rounded-md px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"
+        />
       </div>
 
       {/* Defaults & Temperature */}

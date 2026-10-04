@@ -67,10 +67,12 @@ PromptForge AI features an autonomous, multi-tier cascade engine designed to max
    - **First Automatic Fallback**: Advanced multimodal reasoning model that seamlessly picks up requests if Groq encounters rate limits (HTTP 429) or transient 5xx server errors in under 50ms.
 3. ✨ **Gemini 2.5 Flash** (`gemini-2.5-flash`):
    - **Second Automatic Fallback**: Ultra-high quota model ensuring cloud generation redundancy under heavy traffic.
-4. 🛡️ **Deterministic Offline Synthesizer**:
-   - **Zero-Network Safeguard**: Generates comprehensive, production-grade technical specs fully on-device if you are offline or all cloud networks are unreachable.
-5. 🏷️ **Real-Time Model Badges**:
-   - The Studio output viewer displays dynamic badges (e.g. `⚡ LLaMA 3.3`, `✨ Gemini 3.8`, `✨ Gemini 2.5`, or `🛡️ Local Synthesizer`) so you always know which model fulfilled your request.
+4. 🛡️ **Domain-Intelligent Offline Synthesizer**:
+   - **Zero-Network Safeguard**: Generates comprehensive, production-grade 3-paragraph master prompts fully on-device without quoting the user's raw input. Features specialized domain architectural intelligence for telemetry/weather, auth/security, web scraping, and full-stack systems.
+5. 🌐 **Optional Cloud Relay Proxy (Cloudflare Worker)**:
+   - Includes a production-ready edge worker (`server/`) that can be deployed to Cloudflare Workers with `npx wrangler deploy` to provide a private, zero-key relay endpoint for your team or organization.
+6. 🏷️ **Real-Time Model Badges**:
+   - The Studio output viewer displays dynamic badges (e.g. `⚡ LLaMA 3.3`, `✨ Gemini 3.8`, `✨ Gemini 2.5`, `🌐 LLaMA Proxy`, or `🛡️ Local Synthesizer`) so you always know which engine fulfilled your request.
 
 ---
 

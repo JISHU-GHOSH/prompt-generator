@@ -16,6 +16,7 @@ export interface AppSettings {
   modelOpenAI: string;       // Default: "gpt-4o-mini"
   modelAnthropic: string;    // Default: "claude-3-5-sonnet-20241022"
   modelGroq?: string;        // Default: "llama-3.3-70b-versatile"
+  proxyUrl?: string;         // Optional self-hosted or Cloudflare Worker failover proxy URL
   temperature: number;       // Default: 0.4
   defaultPreset: PresetType;
   defaultTechStack: string[];

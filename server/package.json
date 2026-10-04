@@ -1,0 +1,16 @@
+{
+  "name": "promptforge-proxy",
+  "version": "1.0.0",
+  "description": "Zero-key serverless failover proxy for PromptForge AI",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241004.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^3.80.0"
+  }
+}
