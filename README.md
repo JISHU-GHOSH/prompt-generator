@@ -61,8 +61,8 @@ PromptForge AI features an autonomous, multi-tier cascade engine designed to max
       └───────────────────────────────────────────┘
 ```
 
-1. ⚡ **LLaMA 3.3 70B** (`llama-3.3-70b-versatile` via Groq Cloud):
-   - **Primary Engine**: Ultra-fast inference (~300 tokens/sec), uncensored developer prompt engineering, and deep technical instruction following.
+1. ⚡ **GPT-OSS 120B & LLaMA 3.3 70B** (`openai/gpt-oss-120b` / `llama-3.3-70b-versatile` via Groq Cloud):
+   - **Primary Engine**: Ultra-fast inference (~300 tokens/sec), 131,072-token context window, deep architectural reasoning, and automatic model tier failover across 120B, 70B, and 27B models.
 2. ✨ **Gemini 3.8 Flash** (`gemini-3.8-flash` via Google Generative Language):
    - **First Automatic Fallback**: Advanced multimodal reasoning model that seamlessly picks up requests if Groq encounters rate limits (HTTP 429) or transient 5xx server errors in under 50ms.
 3. ✨ **Gemini 2.5 Flash** (`gemini-2.5-flash`):
@@ -72,7 +72,7 @@ PromptForge AI features an autonomous, multi-tier cascade engine designed to max
 5. 🌐 **Optional Cloud Relay Proxy (Cloudflare Worker)**:
    - Includes a production-ready edge worker (`server/`) that can be deployed to Cloudflare Workers with `npx wrangler deploy` to provide a private, zero-key relay endpoint for your team or organization.
 6. 🏷️ **Real-Time Model Badges**:
-   - The Studio output viewer displays dynamic badges (e.g. `⚡ LLaMA 3.3`, `✨ Gemini 3.8`, `✨ Gemini 2.5`, `🌐 LLaMA Proxy`, or `🛡️ Local Synthesizer`) so you always know which engine fulfilled your request.
+   - The Studio output viewer displays dynamic badges (e.g. `⚡ GPT-OSS 120B`, `⚡ LLaMA 3.3`, `✨ Gemini 3.8`, `✨ Gemini 2.5`, `🌐 LLaMA Proxy`, or `🛡️ Local Synthesizer`) so you always know which engine fulfilled your request.
 
 ---
 
