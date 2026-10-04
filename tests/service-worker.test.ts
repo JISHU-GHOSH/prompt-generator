@@ -146,7 +146,7 @@ describe('Background Service Worker Message Handler', () => {
       expect(response.id).toBeDefined();
 
       expect(mockGeneratePrompt).toHaveBeenCalledWith(
-        expect.stringContaining('Principal Software Architect'),
+        expect.stringContaining('Promptify AI'),
         expect.stringContaining('build user profile page')
       );
 

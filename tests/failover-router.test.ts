@@ -119,12 +119,10 @@ describe('FailoverRouter', () => {
 
     expect(router.getActiveModelUsed()).toBe('local-synthesizer');
     expect(onModelSwitch).toHaveBeenCalledWith('local-synthesizer', expect.any(String));
-    expect(result).toContain('<context>');
-    expect(result).toContain('<objective>');
-    expect(result).toContain('<technical_specification>');
-    expect(result).toContain('<implementation_steps>');
-    expect(result).toContain('<verification>');
+    expect(result).toContain('You are a senior software engineer');
     expect(result).toContain('Build a responsive navbar in React');
+    expect(result).toContain('For each component, workflow, and architectural decision');
+    expect(result).toContain('Structure your guidance around clear implementation phases');
   });
 
   it('should stream chunks cleanly when onChunk is provided and primary succeeds', async () => {
@@ -322,22 +320,18 @@ describe('isFailoverError', () => {
 });
 
 describe('LocalSynthesizer', () => {
-  it('should generate structured XML prompt from user input and tech stack', async () => {
+  it('should generate structured Promptify AI prompt from user input and tech stack', async () => {
     const synth = new LocalSynthesizer();
     const prompt = await synth.generatePrompt(
       'System persona instructions',
       '## Raw User Request\nCreate an authentication modal\n\n## Target Tech Stack\n- React\n- TypeScript\n- Tailwind CSS'
     );
 
-    expect(prompt).toContain('<context>');
-    expect(prompt).toContain('<objective>');
-    expect(prompt).toContain('<technical_specification>');
-    expect(prompt).toContain('<implementation_steps>');
-    expect(prompt).toContain('<edge_cases>');
-    expect(prompt).toContain('<verification>');
+    expect(prompt).toContain('You are a senior software engineer');
     expect(prompt).toContain('Create an authentication modal');
-    expect(prompt).toContain('React');
-    expect(prompt).toContain('TypeScript');
+    expect(prompt).toContain('React, TypeScript, Tailwind CSS');
+    expect(prompt).toContain('For each component, workflow, and architectural decision');
+    expect(prompt).toContain('Structure your guidance around clear implementation phases');
   });
 
   it('should invoke onChunk callback when provided', async () => {

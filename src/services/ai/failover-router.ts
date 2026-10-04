@@ -51,59 +51,33 @@ export class LocalSynthesizer implements AIClient {
 
   private synthesize(userPrompt: string): string {
     const rawMatch = userPrompt.match(/## Raw User Request\s*([\s\S]*?)(?=##|$)/i);
-    const rawInput = (rawMatch ? rawMatch[1] : userPrompt).trim();
+    const rawInput = (rawMatch ? rawMatch[1] : userPrompt).trim() || 'Execute the requested software engineering task';
 
     const stackMatch = userPrompt.match(/## Target Tech Stack\s*([\s\S]*?)(?=##|$)/i);
-    const techStack = stackMatch ? stackMatch[1].trim() : '';
+    const techStack = stackMatch
+      ? stackMatch[1]
+          .split('\n')
+          .map((s) => s.replace(/^-\s*/, '').trim())
+          .filter(Boolean)
+          .join(', ')
+      : '';
 
     const contextMatch = userPrompt.match(/## Additional Project Context\s*([\s\S]*?)(?=##|$)/i);
     const additionalContext = contextMatch ? contextMatch[1].trim() : '';
 
-    const contextItems: string[] = [];
-    if (techStack) {
-      contextItems.push(`Target Stack:\n${techStack}`);
-    }
-    if (additionalContext) {
-      contextItems.push(`Additional Project Context:\n${additionalContext}`);
-    }
-    if (contextItems.length === 0) {
-      contextItems.push('Standard production software development environment.');
-    }
+    const role = techStack
+      ? `senior software engineer and technical lead specializing in ${techStack}`
+      : 'senior software engineer and technical architect';
 
-    return `<context>
-${contextItems.join('\n\n')}
-</context>
+    const p1 = `You are a ${role} acting as technical lead. I need you to provide a comprehensive, formal breakdown of every task, decision, and implementation detail required to execute the following objective: "${rawInput}", with thorough justification for each technical approach chosen.`;
 
-<objective>
-${rawInput || 'Execute the requested software engineering task.'}
-</objective>
+    const p2 = `For each component, workflow, and architectural decision you cover, explicitly explain why you selected this specific methodology, framework, or pattern over alternatives, and critically evaluate whether a superior approach exists that you are not employing—addressing the trade-offs, constraints, maintainability, scalability, and security posture that informed your choice.${
+      additionalContext ? ` Integrate the following project context and constraints: ${additionalContext}.` : ''
+    } Consider edge cases, data validation, and graceful error handling throughout.`;
 
-<technical_specification>
-- Architecture: Modular, maintainable components with clear separation of concerns.
-- Type Safety: Comprehensive TypeScript types, interfaces, and parameter definitions.
-- Error Handling: Defensive programming with boundary validation and graceful error recovery.
-- Code Standards: Modern idiomatic design patterns with zero clutter and optimal performance.
-</technical_specification>
+    const p3 = `Structure your guidance around clear implementation phases: foundational architecture and schema design, core business logic and modular service layers, API endpoint scaffolding with appropriate routing and error boundaries, and comprehensive unit and integration test verification. Throughout, maintain a formal, precise, and authoritative tone appropriate for technical documentation and engineering execution, ensuring that an engineer can both execute successfully and understand the deeper architectural principles governing each decision.`;
 
-<implementation_steps>
-1. Define TypeScript domain models, state interfaces, and data schemas.
-2. Build service modules and API integration layer.
-3. Develop UI components and user interaction handlers.
-4. Add input validation and comprehensive error boundaries.
-5. Create automated unit and integration tests to verify requirements.
-</implementation_steps>
-
-<edge_cases>
-- Validate against empty, undefined, or malformed inputs.
-- Guard against asynchronous race conditions and network failures.
-- Ensure cross-browser stability and platform consistency.
-</edge_cases>
-
-<verification>
-- Run test suite: npm test
-- Run static type checker: npx tsc --noEmit
-- Verify functionality and edge cases against acceptance criteria.
-</verification>`;
+    return `${p1}\n\n${p2}\n\n${p3}`;
   }
 }
 

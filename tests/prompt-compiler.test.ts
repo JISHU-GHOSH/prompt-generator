@@ -3,22 +3,20 @@ import { compileMetaPrompt } from '../src/services/prompt-engine/compiler';
 import { PRESETS, getPreset } from '../src/services/prompt-engine/presets';
 
 describe('Meta-Prompt Compiler', () => {
-  it('should compile a coding agent prompt with XML structure and tech stack', () => {
+  it('should compile a coding agent prompt with Promptify AI structure and tech stack', () => {
     const result = compileMetaPrompt({
       rawInput: 'add dark mode toggle',
       preset: 'coding-agent',
       techStack: ['Next.js', 'Tailwind CSS'],
     });
 
-    expect(result.systemPrompt).toContain('Principal Software Architect');
+    expect(result.systemPrompt).toContain('Promptify AI');
     expect(result.userPrompt).toContain('add dark mode toggle');
     expect(result.userPrompt).toContain('Next.js');
     expect(result.userPrompt).toContain('Tailwind CSS');
-    expect(result.systemPrompt).toContain('<objective>');
-    expect(result.systemPrompt).toContain('<technical_specification>');
-    expect(result.systemPrompt).toContain('<implementation_steps>');
-    expect(result.systemPrompt).toContain('<edge_cases>');
-    expect(result.systemPrompt).toContain('<verification>');
+    expect(result.systemPrompt).toContain('PARAGRAPH 1');
+    expect(result.systemPrompt).toContain('PARAGRAPH 2');
+    expect(result.systemPrompt).toContain('PARAGRAPH 3');
   });
 
   it('should compile an RFC spec prompt with requirements sections', () => {
@@ -91,7 +89,7 @@ describe('Presets Registry', () => {
     expect(codingAgent.id).toBe('coding-agent');
     expect(codingAgent.name).toBeDefined();
     expect(codingAgent.description).toBeDefined();
-    expect(codingAgent.systemPrompt).toContain('Principal Software Architect');
+    expect(codingAgent.systemPrompt).toContain('Promptify AI');
 
     const rfc = getPreset('rfc-spec');
     expect(rfc.id).toBe('rfc-spec');
