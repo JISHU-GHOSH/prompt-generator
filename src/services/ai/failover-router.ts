@@ -181,6 +181,10 @@ export class FailoverRouter implements AIClient {
         const result = await candidate.client.generatePrompt(systemPrompt, userPrompt, onChunk);
         return result;
       } catch (err: unknown) {
+        if (!isFailoverError(err)) {
+          throw err;
+        }
+
         const errMsg = err instanceof Error ? err.message : String(err);
         console.warn(`[FailoverRouter] Model ${candidate.name} failed: ${errMsg}`);
 

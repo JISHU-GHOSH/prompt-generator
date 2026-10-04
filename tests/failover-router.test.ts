@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { FailoverRouter, LocalSynthesizer } from '../src/services/ai/failover-router';
+import { FailoverRouter, LocalSynthesizer, isFailoverError } from '../src/services/ai/failover-router';
 import { GroqClient, RateLimitError } from '../src/services/ai/groq';
 import { GeminiRateLimitError } from '../src/services/ai/gemini';
 import { getAIClient } from '../src/services/ai/client-factory';
@@ -242,6 +242,82 @@ describe('FailoverRouter', () => {
     expect(result).toBe('Custom local output');
     expect(mockLocal.generatePrompt).toHaveBeenCalled();
     expect(router.getActiveModelUsed()).toBe('local-synthesizer');
+  });
+
+  it('should NOT failover on non-failover errors (e.g. invalid JSON or TypeError) and rethrow immediately', async () => {
+    const mockGroq = {
+      generatePrompt: vi.fn().mockRejectedValue(new Error('Invalid JSON structure')),
+    };
+    const mockG38 = { generatePrompt: vi.fn() };
+    const mockG25 = { generatePrompt: vi.fn() };
+
+    const router = new FailoverRouter({
+      groqClient: mockGroq as any,
+      gemini38Client: mockG38 as any,
+      gemini25Client: mockG25 as any,
+    });
+
+    await expect(router.generatePrompt('sys', 'user')).rejects.toThrow('Invalid JSON structure');
+    expect(mockGroq.generatePrompt).toHaveBeenCalled();
+    expect(mockG38.generatePrompt).not.toHaveBeenCalled();
+    expect(mockG25.generatePrompt).not.toHaveBeenCalled();
+  });
+
+  it('should NOT failover on TypeError and rethrow immediately', async () => {
+    const mockGroq = {
+      generatePrompt: vi.fn().mockRejectedValue(new TypeError('Cannot read properties of undefined')),
+    };
+    const mockG38 = { generatePrompt: vi.fn() };
+    const mockG25 = { generatePrompt: vi.fn() };
+
+    const router = new FailoverRouter({
+      groqClient: mockGroq as any,
+      gemini38Client: mockG38 as any,
+      gemini25Client: mockG25 as any,
+    });
+
+    await expect(router.generatePrompt('sys', 'user')).rejects.toThrow(TypeError);
+    expect(mockG38.generatePrompt).not.toHaveBeenCalled();
+  });
+});
+
+describe('isFailoverError', () => {
+  it('should return true for RateLimitError instance', () => {
+    expect(isFailoverError(new RateLimitError('Groq rate limited'))).toBe(true);
+  });
+
+  it('should return true for GeminiRateLimitError instance', () => {
+    expect(isFailoverError(new GeminiRateLimitError('Gemini quota exhausted'))).toBe(true);
+  });
+
+  it('should return true for HTTP status error messages: 429, 500, 502, 503', () => {
+    expect(isFailoverError(new Error('HTTP 429 Too Many Requests'))).toBe(true);
+    expect(isFailoverError(new Error('500 Internal Server Error'))).toBe(true);
+    expect(isFailoverError(new Error('502 Bad Gateway'))).toBe(true);
+    expect(isFailoverError(new Error('503 Service Unavailable'))).toBe(true);
+  });
+
+  it('should return true for rate limit and quota keyword variations', () => {
+    expect(isFailoverError(new Error('Rate limit exceeded for model'))).toBe(true);
+    expect(isFailoverError(new Error('ResourceExhausted: Quota exceeded'))).toBe(true);
+    expect(isFailoverError(new Error('User quota has been exceeded'))).toBe(true);
+  });
+
+  it('should return true for network connectivity and missing API key errors', () => {
+    expect(isFailoverError(new Error('Failed to fetch'))).toBe(true);
+    expect(isFailoverError(new Error('NetworkError when attempting to fetch resource'))).toBe(true);
+    expect(isFailoverError(new Error('missing api key for provider'))).toBe(true);
+    expect(isFailoverError(new Error('API key is missing for Groq.'))).toBe(true);
+  });
+
+  it('should return false for non-failover errors', () => {
+    expect(isFailoverError(new Error('Invalid JSON structure'))).toBe(false);
+    expect(isFailoverError(new TypeError('Cannot read properties of undefined'))).toBe(false);
+    expect(isFailoverError(new SyntaxError('Unexpected token in JSON'))).toBe(false);
+    expect(isFailoverError(new Error('Assertion failed'))).toBe(false);
+    expect(isFailoverError(null)).toBe(false);
+    expect(isFailoverError(undefined)).toBe(false);
+    expect(isFailoverError('')).toBe(false);
   });
 });
 
