@@ -24,6 +24,8 @@ export interface AppSettings {
 
 export type PromptIntent = 'kickoff' | 'followup' | 'ideation';
 
+export type IntentMode = 'auto' | 'kickoff' | 'followup' | 'ideation';
+
 export interface PromptHistoryItem {
   id: string;
   timestamp: number;

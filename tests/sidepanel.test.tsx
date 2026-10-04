@@ -124,6 +124,76 @@ describe('Side Panel React Application', () => {
 
       expect(await screen.findByText(/Enhanced Coding Prompt/i)).toBeInTheDocument();
     });
+
+    it('should switch to explicit follow-up mode and update UI and prompt generation', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('Make the button color red and add 12px padding.');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+      });
+
+      render(<App />);
+
+      // Switch to Follow-Up mode
+      const followupBtn = screen.getByRole('button', { name: /Follow-Up/i });
+      fireEvent.click(followupBtn);
+
+      // Check placeholder updated
+      expect(screen.getByPlaceholderText(/e\.g\. make it faster, fix the TypeError/i)).toBeInTheDocument();
+
+      // Enter input
+      const textarea = screen.getByPlaceholderText(/e\.g\. make it faster, fix the TypeError/i);
+      fireEvent.change(textarea, { target: { value: 'make the navbar responsive' } });
+
+      // Check button text
+      const generateBtn = screen.getByRole('button', { name: /Promptify Mini-Prompt \(Follow-Up\)/i });
+      expect(generateBtn).toBeInTheDocument();
+
+      fireEvent.click(generateBtn);
+
+      await waitFor(() => {
+        expect(mockGeneratePrompt).toHaveBeenCalled();
+      });
+
+      // Verify user prompt contained the surgical follow-up instruction
+      const userPromptArg = mockGeneratePrompt.mock.calls[0][1];
+      expect(userPromptArg).toContain('Follow-Up / Conversational Steer');
+      expect(userPromptArg).toContain('surgical, focused prompt with NO persona introduction');
+    });
+
+    it('should switch to explicit ideation mode and update UI and prompt generation', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('Feature Ideation Roadmap');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+      });
+
+      render(<App />);
+
+      // Switch to Ideation mode using explicit button
+      const ideationBtn = screen.getByRole('button', { name: /💡 Ideation/i });
+      fireEvent.click(ideationBtn);
+
+      // Check placeholder updated
+      expect(screen.getByPlaceholderText(/what features can we add/i)).toBeInTheDocument();
+
+      // Enter input
+      const textarea = screen.getByPlaceholderText(/what features can we add/i);
+      fireEvent.change(textarea, { target: { value: 'interview preparation features' } });
+
+      // Check button text
+      const generateBtn = screen.getByRole('button', { name: /Promptify Feature Roadmap \(Ideation\)/i });
+      expect(generateBtn).toBeInTheDocument();
+
+      fireEvent.click(generateBtn);
+
+      await waitFor(() => {
+        expect(mockGeneratePrompt).toHaveBeenCalled();
+      });
+
+      // Verify user prompt contained the ideation instruction
+      const userPromptArg = mockGeneratePrompt.mock.calls[0][1];
+      expect(userPromptArg).toContain('Product Ideation & Feature Discovery');
+      expect(userPromptArg).toContain('STRICTLY DO NOT generate code snippets');
+    });
   });
 
   describe('OutputViewer Actions', () => {

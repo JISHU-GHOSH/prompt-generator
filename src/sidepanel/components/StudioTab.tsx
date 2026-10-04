@@ -14,7 +14,7 @@ import {
   RotateCcw,
   Lightbulb,
 } from 'lucide-react';
-import { PresetType, ProviderType, PromptIntent } from '../../types';
+import { PresetType, ProviderType, PromptIntent, IntentMode } from '../../types';
 import { PRESET_LIST } from '../../services/prompt-engine/presets';
 import { detectPromptIntent } from '../../services/prompt-engine/compiler';
 import { OutputViewer } from './OutputViewer';
@@ -32,6 +32,8 @@ export interface StudioTabProps {
   setOutputPrompt: (val: string) => void;
   activeModel?: string;
   intent?: PromptIntent;
+  intentMode: IntentMode;
+  setIntentMode: (mode: IntentMode) => void;
   isGenerating: boolean;
   error: string | null;
   setError: (err: string | null) => void;
@@ -69,6 +71,8 @@ export const StudioTab: React.FC<StudioTabProps> = ({
   outputPrompt,
   activeModel,
   intent,
+  intentMode,
+  setIntentMode,
   isGenerating,
   error,
   setError,
@@ -83,7 +87,8 @@ export const StudioTab: React.FC<StudioTabProps> = ({
   const [newTagInput, setNewTagInput] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const liveIntent = detectPromptIntent(rawInput);
+  const effectiveIntent: PromptIntent =
+    intentMode === 'auto' ? detectPromptIntent(rawInput) : intentMode;
 
   const getPresetIcon = (id: PresetType) => {
     switch (id) {
@@ -194,6 +199,64 @@ export const StudioTab: React.FC<StudioTabProps> = ({
         </div>
       </div>
 
+      {/* Interaction Mode Selector */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            Interaction Mode
+          </label>
+          <span className="text-[10px] text-slate-500">
+            {intentMode === 'auto' ? '🪄 Smart Auto-Detect' : '📌 Explicit Mode'}
+          </span>
+        </div>
+        <div className="grid grid-cols-4 gap-1.5 p-1 rounded-lg bg-slate-950/80 border border-slate-800">
+          <button
+            type="button"
+            onClick={() => setIntentMode('auto')}
+            className={`py-1.5 px-1 rounded-md text-[11px] font-medium transition-all text-center flex items-center justify-center gap-1 ${
+              intentMode === 'auto'
+                ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>🪄</span> Auto
+          </button>
+          <button
+            type="button"
+            onClick={() => setIntentMode('kickoff')}
+            className={`py-1.5 px-1 rounded-md text-[11px] font-medium transition-all text-center flex items-center justify-center gap-1 ${
+              intentMode === 'kickoff'
+                ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>🎯</span> Kickoff
+          </button>
+          <button
+            type="button"
+            onClick={() => setIntentMode('followup')}
+            className={`py-1.5 px-1 rounded-md text-[11px] font-medium transition-all text-center flex items-center justify-center gap-1 ${
+              intentMode === 'followup'
+                ? 'bg-amber-600 text-white shadow-sm font-semibold'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>⚡</span> Follow-Up
+          </button>
+          <button
+            type="button"
+            onClick={() => setIntentMode('ideation')}
+            className={`py-1.5 px-1 rounded-md text-[11px] font-medium transition-all text-center flex items-center justify-center gap-1 ${
+              intentMode === 'ideation'
+                ? 'bg-emerald-600 text-white shadow-sm font-semibold'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>💡</span> Ideation
+          </button>
+        </div>
+      </div>
+
       {/* Raw Input Prompt */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
@@ -204,16 +267,16 @@ export const StudioTab: React.FC<StudioTabProps> = ({
             {rawInput.trim() && (
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
-                  liveIntent === 'ideation'
+                  effectiveIntent === 'ideation'
                     ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
-                    : liveIntent === 'followup'
+                    : effectiveIntent === 'followup'
                     ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
                     : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
                 }`}
               >
-                {liveIntent === 'ideation'
+                {effectiveIntent === 'ideation'
                   ? '💡 Feature Ideation'
-                  : liveIntent === 'followup'
+                  : effectiveIntent === 'followup'
                   ? '⚡ Follow-Up Steer'
                   : '🎯 Project Kickoff'}
               </span>
@@ -234,7 +297,13 @@ export const StudioTab: React.FC<StudioTabProps> = ({
           <textarea
             value={rawInput}
             onChange={(e) => setRawInput(e.target.value)}
-            placeholder="Describe what you want to build or fix in plain English..."
+            placeholder={
+              effectiveIntent === 'followup'
+                ? 'e.g. make it faster, fix the TypeError on line 14, now do step 2...'
+                : effectiveIntent === 'ideation'
+                ? 'e.g. what features can we add to an interview prep app, what should we build next...'
+                : 'Describe what you want to build or fix in plain English...'
+            }
             rows={4}
             className="w-full rounded-lg bg-slate-950/80 border border-slate-800 p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-y leading-relaxed"
           />
@@ -356,14 +425,14 @@ export const StudioTab: React.FC<StudioTabProps> = ({
         <Sparkles className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
         <span>
           {isGenerating
-            ? (liveIntent === 'ideation'
+            ? (effectiveIntent === 'ideation'
                 ? 'Synthesizing Feature Roadmap...'
-                : liveIntent === 'followup'
+                : effectiveIntent === 'followup'
                 ? 'Synthesizing Mini-Prompt...'
                 : 'Promptifying...')
-            : (liveIntent === 'ideation'
+            : (effectiveIntent === 'ideation'
                 ? 'Promptify Feature Roadmap (Ideation)'
-                : liveIntent === 'followup'
+                : effectiveIntent === 'followup'
                 ? 'Promptify Mini-Prompt (Follow-Up)'
                 : 'Promptify (Enhance Prompt)')}
         </span>
@@ -375,7 +444,7 @@ export const StudioTab: React.FC<StudioTabProps> = ({
           <OutputViewer
             prompt={outputPrompt}
             activeModel={activeModel}
-            intent={intent || (rawInput.trim() ? liveIntent : undefined)}
+            intent={intent || (rawInput.trim() ? effectiveIntent : undefined)}
             isStreaming={isGenerating}
             onSendToTab={onSendToTab}
             onSave={onSave}

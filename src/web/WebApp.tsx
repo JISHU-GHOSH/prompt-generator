@@ -14,7 +14,7 @@ import {
   ArrowRight,
   ShieldCheck,
 } from 'lucide-react';
-import { PresetType, PromptIntent } from '../types';
+import { PresetType, PromptIntent, IntentMode } from '../types';
 import { compileMetaPrompt, detectPromptIntent } from '../services/prompt-engine/compiler';
 import { FailoverRouter, LocalSynthesizer } from '../services/ai/failover-router';
 import { storageService } from '../services/storage';
@@ -52,6 +52,7 @@ export const WebApp: React.FC = () => {
   const [selectedPreset, setSelectedPreset] = useState<PresetType>('coding-agent');
   const [techStack, setTechStack] = useState<string[]>(['Python']);
   const [newTech, setNewTech] = useState('');
+  const [intentMode, setIntentMode] = useState<IntentMode>('auto');
   const [detailLevel, setDetailLevel] = useState<'brief' | 'standard' | 'comprehensive'>('standard');
   const [outputPrompt, setOutputPrompt] = useState('');
   const [activeModel, setActiveModel] = useState<string>('openai/gpt-oss-120b');
@@ -60,7 +61,8 @@ export const WebApp: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const liveIntent = detectPromptIntent(rawInput);
+  const effectiveIntent: PromptIntent =
+    intentMode === 'auto' ? detectPromptIntent(rawInput) : intentMode;
 
   // Toggle tech stack item
   const toggleTech = (tech: string) => {
@@ -83,11 +85,13 @@ export const WebApp: React.FC = () => {
     setErrorMsg(null);
     setOutputPrompt('');
 
+    const explicitIntent = intentMode === 'auto' ? undefined : intentMode;
     const compiled = compileMetaPrompt({
       rawInput: rawInput.trim(),
       preset: selectedPreset,
       techStack,
       additionalContext: detailLevel !== 'standard' ? `Detail Level: ${detailLevel}` : undefined,
+      intent: explicitIntent,
     });
 
     setIntent(compiled.intent);
@@ -247,6 +251,65 @@ export const WebApp: React.FC = () => {
         <section className="lg:col-span-5 flex flex-col space-y-5">
           {/* Prompt Input Card */}
           <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-sm flex flex-col space-y-4">
+            {/* Interaction Mode Selector */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                  <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Interaction Mode</span>
+                </label>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {intentMode === 'auto' ? '🪄 Auto-detected' : '📌 Manual override'}
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIntentMode('auto')}
+                  className={`py-1.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1 ${
+                    intentMode === 'auto'
+                      ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>🪄</span> Auto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIntentMode('kickoff')}
+                  className={`py-1.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1 ${
+                    intentMode === 'kickoff'
+                      ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>🎯</span> Kickoff
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIntentMode('followup')}
+                  className={`py-1.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1 ${
+                    intentMode === 'followup'
+                      ? 'bg-amber-600 text-white shadow-sm font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>⚡</span> Follow-Up
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIntentMode('ideation')}
+                  className={`py-1.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1 ${
+                    intentMode === 'ideation'
+                      ? 'bg-emerald-600 text-white shadow-sm font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>💡</span> Ideation
+                </button>
+              </div>
+            </div>
+
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center space-x-2">
@@ -257,16 +320,16 @@ export const WebApp: React.FC = () => {
                   {rawInput.trim() && (
                     <span
                       className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${
-                        liveIntent === 'ideation'
+                        effectiveIntent === 'ideation'
                           ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
-                          : liveIntent === 'followup'
+                          : effectiveIntent === 'followup'
                           ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
                           : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
                       }`}
                     >
-                      {liveIntent === 'ideation'
+                      {effectiveIntent === 'ideation'
                         ? '💡 Feature Ideation'
-                        : liveIntent === 'followup'
+                        : effectiveIntent === 'followup'
                         ? '⚡ Follow-Up Steer'
                         : '🎯 Project Kickoff'}
                     </span>
@@ -279,7 +342,13 @@ export const WebApp: React.FC = () => {
               <textarea
                 value={rawInput}
                 onChange={(e) => setRawInput(e.target.value)}
-                placeholder="e.g. python app for sorting shopping list and prices..."
+                placeholder={
+                  effectiveIntent === 'followup'
+                    ? 'e.g. make it faster, fix the TypeError on line 14, now do step 2...'
+                    : effectiveIntent === 'ideation'
+                    ? 'e.g. what features can we add to an interview prep app, what should we build next...'
+                    : 'e.g. python app for sorting shopping list and prices...'
+                }
                 rows={5}
                 className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-y leading-relaxed"
               />
@@ -416,9 +485,9 @@ export const WebApp: React.FC = () => {
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   <span>
-                    {liveIntent === 'ideation'
+                    {effectiveIntent === 'ideation'
                       ? 'Synthesizing Feature Roadmap...'
-                      : liveIntent === 'followup'
+                      : effectiveIntent === 'followup'
                       ? 'Synthesizing Surgical Mini-Prompt...'
                       : 'Synthesizing 120B Master Prompt...'}
                   </span>
@@ -427,9 +496,9 @@ export const WebApp: React.FC = () => {
                 <>
                   <Sparkles className="w-4 h-4 fill-current" />
                   <span>
-                    {liveIntent === 'ideation'
+                    {effectiveIntent === 'ideation'
                       ? 'Synthesize Feature Roadmap (Ideation)'
-                      : liveIntent === 'followup'
+                      : effectiveIntent === 'followup'
                       ? 'Synthesize Mini-Prompt (Follow-Up)'
                       : 'Enhance Prompt (Kickoff)'}
                   </span>

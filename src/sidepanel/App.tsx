@@ -6,7 +6,7 @@ import { SettingsTab } from './components/SettingsTab';
 import { storageService, DEFAULT_SETTINGS } from '../services/storage';
 import { compileMetaPrompt } from '../services/prompt-engine/compiler';
 import { getAIClient } from '../services/ai/client-factory';
-import { AppSettings, PromptHistoryItem, PresetType, PromptIntent } from '../types';
+import { AppSettings, PromptHistoryItem, PresetType, PromptIntent, IntentMode } from '../types';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'studio' | 'library' | 'settings'>('studio');
@@ -18,6 +18,7 @@ export const App: React.FC = () => {
   const [preset, setPreset] = useState<PresetType>(DEFAULT_SETTINGS.defaultPreset);
   const [techStack, setTechStack] = useState<string[]>(DEFAULT_SETTINGS.defaultTechStack);
   const [additionalContext, setAdditionalContext] = useState('');
+  const [intentMode, setIntentMode] = useState<IntentMode>('auto');
   const [outputPrompt, setOutputPrompt] = useState('');
   const [activeModel, setActiveModel] = useState<string | undefined>(undefined);
   const [currentIntent, setCurrentIntent] = useState<PromptIntent | undefined>(undefined);
@@ -76,11 +77,13 @@ export const App: React.FC = () => {
     setIsGenerating(true);
 
     try {
+      const explicitIntent = intentMode === 'auto' ? undefined : intentMode;
       const compiled = compileMetaPrompt({
         rawInput: trimmedInput,
         preset,
         techStack,
         additionalContext: additionalContext.trim() || undefined,
+        intent: explicitIntent,
       });
 
       setCurrentIntent(compiled.intent);
@@ -259,6 +262,8 @@ export const App: React.FC = () => {
             setOutputPrompt={setOutputPrompt}
             activeModel={activeModel}
             intent={currentIntent}
+            intentMode={intentMode}
+            setIntentMode={setIntentMode}
             isGenerating={isGenerating}
             error={error}
             setError={setError}
