@@ -167,9 +167,9 @@ describe('Content Script In-Page Utilities', () => {
     it('should create wand button with correct attributes and accessibility labels', () => {
       const btn = createWandButton();
       expect(btn).not.toBeNull();
-      expect(btn.classList.contains('promtify-wand-btn')).toBe(true);
-      expect(btn.getAttribute('aria-label')).toBe('Promptify AI (Alt+P)');
-      expect(btn.getAttribute('title')).toContain('Promptify');
+      expect(btn.classList.contains('promptforge-wand-btn')).toBe(true);
+      expect(btn.getAttribute('aria-label')).toBe('PromptForge AI (Alt+P)');
+      expect(btn.getAttribute('title')).toContain('PromptForge');
     });
 
     it('should attach wand button next to prompt input container', () => {
@@ -182,7 +182,7 @@ describe('Content Script In-Page Utilities', () => {
       const btn = attachWandToElement(input);
 
       expect(btn).not.toBeNull();
-      expect(document.querySelector('.promtify-wand-btn')).not.toBeNull();
+      expect(document.querySelector('.promptforge-wand-btn')).not.toBeNull();
     });
 
     it('should not attach duplicate wand buttons to the same target', () => {
@@ -192,17 +192,17 @@ describe('Content Script In-Page Utilities', () => {
       const btn2 = attachWandToElement(input);
 
       expect(btn1).toBe(btn2);
-      expect(document.querySelectorAll('.promtify-wand-btn').length).toBe(1);
+      expect(document.querySelectorAll('.promptforge-wand-btn').length).toBe(1);
     });
 
     it('should remove existing wand button cleanly', () => {
       document.body.innerHTML = '<textarea id="prompt-textarea"></textarea>';
       const input = document.querySelector('textarea')!;
       attachWandToElement(input);
-      expect(document.querySelector('.promtify-wand-btn')).not.toBeNull();
+      expect(document.querySelector('.promptforge-wand-btn')).not.toBeNull();
 
       removeWand();
-      expect(document.querySelector('.promtify-wand-btn')).toBeNull();
+      expect(document.querySelector('.promptforge-wand-btn')).toBeNull();
     });
   });
 
@@ -337,7 +337,7 @@ describe('Content Script In-Page Utilities', () => {
       document.body.innerHTML = '<div>No input initially</div>';
       const cleanup = setupContentScript();
 
-      expect(document.querySelector('.promtify-wand-btn')).toBeNull();
+      expect(document.querySelector('.promptforge-wand-btn')).toBeNull();
 
       // Rapidly mutate DOM multiple times (simulating streaming tokens)
       for (let i = 0; i < 5; i++) {
@@ -351,12 +351,12 @@ describe('Content Script In-Page Utilities', () => {
       document.body.appendChild(input);
 
       // Immediately after mutation, debounce timer is pending
-      expect(document.querySelector('.promtify-wand-btn')).toBeNull();
+      expect(document.querySelector('.promptforge-wand-btn')).toBeNull();
 
       // Wait for debounce timer (200ms + margin)
       await new Promise((r) => setTimeout(r, 260));
 
-      expect(document.querySelector('.promtify-wand-btn')).not.toBeNull();
+      expect(document.querySelector('.promptforge-wand-btn')).not.toBeNull();
 
       cleanup();
     });

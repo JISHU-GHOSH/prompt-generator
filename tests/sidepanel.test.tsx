@@ -49,7 +49,7 @@ describe('Side Panel React Application', () => {
     it('should render header with Promtify AI logo and navigation tabs', async () => {
       render(<App />);
 
-      expect(await screen.findByText(/Promtify AI/i)).toBeInTheDocument();
+      expect(await screen.findByText(/PromptForge AI/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Studio/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Library/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Settings/i })).toBeInTheDocument();

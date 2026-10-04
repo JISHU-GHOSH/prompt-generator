@@ -1,4 +1,4 @@
-# Promtify AI 🚀
+# PromptForge AI 🚀
 ### Professional Coding Prompt Generator & Technical Spec Compiler (Chrome Extension)
 
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-brightgreen.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
@@ -8,13 +8,13 @@
 [![Vitest](https://img.shields.io/badge/Vitest-2-yellow.svg)](https://vitest.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
-**Promtify AI** is a privacy-first, developer-focused Google Chrome extension (Manifest V3) that turns casual, vague coding ideas into production-grade, highly structured technical prompts and architecture specifications for AI coding tools like ChatGPT, Claude, Gemini, Cursor, Copilot, and GitHub.
+**PromptForge AI** is a privacy-first, developer-focused Google Chrome extension (Manifest V3) that turns casual, vague coding ideas into production-grade, highly structured technical prompts and architecture specifications for AI coding tools like ChatGPT, Claude, Gemini, Cursor, Copilot, and GitHub.
 
 ---
 
-## 🌟 Why Promtify AI?
+## 🌟 Why PromptForge AI?
 
-Vague prompts lead to hallucinated logic, missing edge cases, and incomplete boilerplate when prompting modern LLMs. **Promtify AI** bridges this gap by acting as an intelligent prompt compilation and refinement layer:
+Vague prompts lead to hallucinated logic, missing edge cases, and incomplete boilerplate when prompting modern LLMs. **PromptForge AI** bridges this gap by acting as an intelligent prompt compilation and refinement layer:
 
 - **Structure & Precision**: Enforces architectural context, technical stack constraints, edge cases, error handling, security considerations, and concrete acceptance criteria.
 - **Side Panel Workflow**: Lives right alongside your code editors and browser tabs using Chrome's native Side Panel API (`chrome.sidePanel`).
@@ -64,8 +64,8 @@ Follow these steps to build and load the extension in developer mode on Google C
 
 ### Step 1: Clone and Install Dependencies
 ```bash
-git clone https://github.com/your-username/promtify-ai.git
-cd promtify-ai
+git clone https://github.com/JISHU-GHOSH/prompt-generator.git
+cd prompt-generator
 npm install
 ```
 
@@ -82,20 +82,20 @@ This runs TypeScript validation (`tsc --noEmit`) and builds all extension bundle
    ```
 2. In the top-right corner, toggle **Developer mode** to **ON**.
 3. In the top-left corner, click the **Load unpacked** button.
-4. In the file picker dialog, navigate to your repository and select the **`dist`** directory (e.g. `c:\Users\...\promtify-ai\dist`).
+4. In the file picker dialog, navigate to your repository and select the **`dist`** directory (e.g. `c:\Users\...\prompt-generator\dist`).
 5. Click **Select Folder**.
-6. Promtify AI is now loaded! You will see **Promtify AI - Professional Coding Prompt Generator** in your extensions list.
+6. PromptForge AI is now loaded! You will see **PromptForge AI - Professional Coding Prompt Generator** in your extensions list.
 
-### Step 4: Pin and Open Promtify AI
+### Step 4: Pin and Open PromptForge AI
 1. Click the puzzle icon (Extensions menu) in the Chrome toolbar.
-2. Find **Promtify AI** and click the **Pin** icon.
-3. Click the Promtify AI icon to immediately open the Side Panel Studio, or open any supported AI web app (ChatGPT, Claude, Gemini, GitHub) to use the in-page Magic Wand.
+2. Find **PromptForge AI** and click the **Pin** icon.
+3. Click the PromptForge AI icon to immediately open the Side Panel Studio, or open any supported AI web app (ChatGPT, Claude, Gemini, GitHub) to use the in-page Magic Wand.
 
 ---
 
 ## 🔑 Getting & Configuring API Keys
 
-Promtify AI allows you to use your preferred LLM provider. We recommend **Google Gemini** because Google provides a high-quota **free tier** that does not require entering a credit card.
+PromptForge AI allows you to use your preferred LLM provider. We recommend **Google Gemini** because Google provides a high-quota **free tier** that does not require entering a credit card.
 
 ### 1. Google Gemini (Recommended & Free)
 1. Go to [Google AI Studio](https://aistudio.google.com/).
@@ -103,7 +103,7 @@ Promtify AI allows you to use your preferred LLM provider. We recommend **Google
 3. Click **Get API key** in the left sidebar or top toolbar.
 4. Click **Create API key** (choose any existing Google Cloud project or create a default one).
 5. Copy your new Gemini API key.
-6. Open the Promtify AI Side Panel, switch to the **Settings** tab.
+6. Open the PromptForge AI Side Panel, switch to the **Settings** tab.
 7. Select **Google Gemini** under AI Provider, paste your key, and click **Save Settings**.
 > **Free Tier Quota**: Google Gemini 1.5 Flash provides up to 15 Requests Per Minute (RPM), 1,000,000 Tokens Per Minute (TPM), and 1,500 Requests Per Day for free.
 
@@ -111,12 +111,12 @@ Promtify AI allows you to use your preferred LLM provider. We recommend **Google
 1. Go to the [OpenAI Platform API Keys](https://platform.openai.com/api-keys).
 2. Sign in and click **Create new secret key**.
 3. Copy the key (`sk-...`).
-4. In Promtify AI Settings, choose **OpenAI**, paste your API key, and click **Save Settings**.
+4. In PromptForge AI Settings, choose **OpenAI**, paste your API key, and click **Save Settings**.
 
 ### 3. Anthropic (Claude 3.5 Sonnet)
 1. Go to the [Anthropic Console](https://console.anthropic.com/).
 2. Navigate to **API Keys** and generate a new key (`sk-ant-...`).
-3. In Promtify AI Settings, choose **Anthropic**, paste your API key, and click **Save Settings**.
+3. In PromptForge AI Settings, choose **Anthropic**, paste your API key, and click **Save Settings**.
 
 ---
 
@@ -146,10 +146,10 @@ Runs 95+ unit and component tests verifying:
 
 ---
 
-## 📁 Project Structure
+### 📁 Project Structure
 
 ```text
-promtify-ai/
+prompt-generator/
 ├── manifest.json              # Extension Manifest V3 configuration
 ├── vite.config.ts             # Vite multi-page build configuration
 ├── tailwind.config.js         # Tailwind CSS styling configuration
@@ -167,11 +167,10 @@ promtify-ai/
 │   │   ├── App.tsx            # Main application UI with tabs & state
 │   │   ├── components/        # Studio, Templates, History, Settings views
 │   │   └── index.css          # Tailwind CSS styles
-│   └── lib/
-│       ├── ai-client.ts       # BYOK clients for Gemini, OpenAI & Anthropic
-│       ├── prompt-compiler.ts # Meta-prompt compilation & template engine
-│       ├── storage.ts         # Chrome storage wrapper (local & sync)
-│       └── types.ts           # Shared TypeScript interfaces & types
+│   └── services/
+│       ├── ai/                # BYOK clients for Gemini, OpenAI & Anthropic
+│       ├── prompt-engine/     # Meta-prompt compilation & template engine
+│       └── storage.ts         # Chrome storage wrapper (chrome.storage.local)
 ├── tests/                     # Comprehensive Vitest test suite
 │   ├── ai-client.test.ts
 │   ├── content-script.test.ts
@@ -195,8 +194,8 @@ promtify-ai/
 
 ## 🔒 Security & Privacy
 
-- **No Third-Party Backend**: Promtify AI operates entirely on-device and communicates directly with official LLM endpoints.
-- **Secure Key Storage**: API keys are stored in `chrome.storage.sync` / `chrome.storage.local` within your browser's encrypted profile directory.
+- **No Third-Party Backend**: PromptForge AI operates entirely on-device and communicates directly with official LLM endpoints.
+- **Secure Key Storage**: API keys are stored in `chrome.storage.local` within your browser's encrypted profile directory.
 - **Scoped Permissions**: Requests only `sidePanel`, `storage`, and `activeTab` permissions, plus explicitly defined host permissions for LLM provider APIs.
 
 ---

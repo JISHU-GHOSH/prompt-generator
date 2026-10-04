@@ -1,5 +1,5 @@
 /**
- * Promtify AI - Core Domain Types
+ * PromptForge AI - Core Domain Types
  */
 
 export type PresetType = 'coding-agent' | 'rfc-spec' | 'bugfix' | 'cursorrules';

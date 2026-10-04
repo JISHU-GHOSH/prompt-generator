@@ -1,5 +1,5 @@
 /**
- * Promtify AI - Meta-Prompt Compiler
+ * PromptForge AI - Meta-Prompt Compiler
  * 
  * Compiles raw user inputs, selected presets, tech stack specifications,
  * and additional context into system and user prompts ready for LLM consumption.

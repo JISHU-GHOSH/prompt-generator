@@ -1,5 +1,5 @@
 /**
- * Promtify AI - Presets Registry
+ * PromptForge AI - Presets Registry
  * 
  * Defines standard prompt engineering presets for coding agents, RFC specs,
  * bug diagnosis, and IDE configuration rules.

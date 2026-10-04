@@ -1,5 +1,5 @@
 /**
- * Promtify AI - Meta-Prompt Engine & Personas
+ * PromptForge AI - Meta-Prompt Engine & Personas
  * 
  * Provides foundational system personas, meta-prompt transformation instructions,
  * and structured output schemas for each preset.

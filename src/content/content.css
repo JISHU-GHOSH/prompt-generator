@@ -1,6 +1,6 @@
-/* Promtify AI - In-Page Content Styles */
+/* PromptForge AI - In-Page Content Styles */
 
-.promtify-wand-btn {
+.promptforge-wand-btn {
   position: fixed;
   display: inline-flex;
   align-items: center;
@@ -22,34 +22,34 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.promtify-wand-btn:hover {
+.promptforge-wand-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 18px rgba(139, 92, 246, 0.55);
   filter: brightness(1.12);
 }
 
-.promtify-wand-btn:active {
+.promptforge-wand-btn:active {
   transform: scale(0.92);
 }
 
-.promtify-wand-btn[disabled],
-.promtify-wand-btn.promtify-loading {
+.promptforge-wand-btn[disabled],
+.promptforge-wand-btn.promptforge-loading {
   cursor: wait;
   opacity: 0.85;
   pointer-events: none;
 }
 
-.promtify-wand-btn.promtify-success {
+.promptforge-wand-btn.promptforge-success {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
 }
 
-.promtify-wand-btn.promtify-error {
+.promptforge-wand-btn.promptforge-error {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
 }
 
-.promtify-wand-icon {
+.promptforge-wand-icon {
   width: 16px;
   height: 16px;
   display: block;
@@ -61,7 +61,7 @@
   pointer-events: none;
 }
 
-@keyframes promtify-spin {
+@keyframes promptforge-spin {
   from {
     transform: rotate(0deg);
   }
@@ -70,11 +70,11 @@
   }
 }
 
-.promtify-spinner {
-  animation: promtify-spin 0.8s linear infinite;
+.promptforge-spinner {
+  animation: promptforge-spin 0.8s linear infinite;
 }
 
-.promtify-toast {
+.promptforge-toast {
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -90,11 +90,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  animation: promtify-slide-up 0.25s ease-out;
+  animation: promptforge-slide-up 0.25s ease-out;
   pointer-events: none;
 }
 
-@keyframes promtify-slide-up {
+@keyframes promptforge-slide-up {
   from {
     opacity: 0;
     transform: translateY(12px);

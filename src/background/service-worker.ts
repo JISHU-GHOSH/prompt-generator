@@ -1,5 +1,5 @@
 /**
- * Promtify AI - Background Service Worker (Manifest V3)
+ * PromptForge AI - Background Service Worker (Manifest V3)
  *
  * Responsibilities:
  * 1. Configure side panel behavior (open on extension icon click).

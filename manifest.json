@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Promtify AI - Professional Coding Prompt Generator",
+  "name": "PromptForge AI - Professional Coding Prompt Generator",
   "version": "1.0.0",
   "description": "Turn casual ideas into professional, high-precision technical prompts and specs for AI coding tools.",
   "permissions": [
@@ -21,7 +21,7 @@
     "default_path": "src/sidepanel/index.html"
   },
   "action": {
-    "default_title": "Open Promtify AI Studio"
+    "default_title": "Open PromptForge AI Studio"
   },
   "content_scripts": [
     {

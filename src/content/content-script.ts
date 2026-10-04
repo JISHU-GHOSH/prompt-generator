@@ -1,5 +1,5 @@
 /**
- * Promtify AI - In-Page Content Script & Magic Wand
+ * PromptForge AI - In-Page Content Script & Magic Wand
  *
  * Responsibilities:
  * 1. Discover active chat inputs across AI platforms (ChatGPT, Claude, Gemini, GitHub).
@@ -17,27 +17,27 @@ let stateResetTimeout: any = null;
 
 // SVG Icons
 const WAND_SVG = `
-  <svg class="promtify-wand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg class="promptforge-wand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="m19 11-4-4m0 0L3 19l4 4 12-12Z"/>
     <path d="m15 5 1.5-3 1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5Z"/>
   </svg>
 `;
 
 const SPINNER_SVG = `
-  <svg class="promtify-wand-icon promtify-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg class="promptforge-wand-icon promptforge-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
     <path d="M12 2a10 10 0 0 1 10 10"/>
   </svg>
 `;
 
 const CHECK_SVG = `
-  <svg class="promtify-wand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg class="promptforge-wand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <polyline points="20 6 9 17 4 12"/>
   </svg>
 `;
 
 const ALERT_SVG = `
-  <svg class="promtify-wand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg class="promptforge-wand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="10"/>
     <line x1="12" y1="8" x2="12" y2="12"/>
     <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -49,7 +49,7 @@ const ALERT_SVG = `
  */
 export function isInputElement(el: Element | null): boolean {
   if (!el || !(el instanceof HTMLElement)) return false;
-  if (el.classList.contains('promtify-wand-btn') || el.closest('.promtify-wand-btn')) return false;
+  if (el.classList.contains('promptforge-wand-btn') || el.closest('.promptforge-wand-btn')) return false;
 
   const tagName = el.tagName.toLowerCase();
   if (tagName === 'textarea') return true;
@@ -209,18 +209,18 @@ export function setWandState(
     stateResetTimeout = null;
   }
 
-  button.classList.remove('promtify-loading', 'promtify-success', 'promtify-error');
+  button.classList.remove('promptforge-loading', 'promptforge-success', 'promptforge-error');
 
   switch (state) {
     case 'loading':
-      button.classList.add('promtify-loading');
+      button.classList.add('promptforge-loading');
       button.innerHTML = SPINNER_SVG;
       button.setAttribute('aria-busy', 'true');
       button.disabled = true;
       break;
 
     case 'success':
-      button.classList.add('promtify-success');
+      button.classList.add('promptforge-success');
       button.innerHTML = CHECK_SVG;
       button.removeAttribute('aria-busy');
       button.disabled = false;
@@ -230,7 +230,7 @@ export function setWandState(
       break;
 
     case 'error':
-      button.classList.add('promtify-error');
+      button.classList.add('promptforge-error');
       button.innerHTML = ALERT_SVG;
       button.removeAttribute('aria-busy');
       button.disabled = false;
@@ -253,9 +253,9 @@ export function setWandState(
  */
 export function createWandButton(): HTMLButtonElement {
   const btn = document.createElement('button');
-  btn.className = 'promtify-wand-btn';
-  btn.title = 'Promptify AI (Alt+P) - Refine & Enhance Prompt';
-  btn.setAttribute('aria-label', 'Promptify AI (Alt+P)');
+  btn.className = 'promptforge-wand-btn';
+  btn.title = 'PromptForge AI (Alt+P) - Refine & Enhance Prompt';
+  btn.setAttribute('aria-label', 'PromptForge AI (Alt+P)');
   btn.type = 'button';
   btn.innerHTML = WAND_SVG;
   return btn;
@@ -282,11 +282,11 @@ export function updateWandPosition(button: HTMLButtonElement, target: HTMLElemen
  */
 export function showToast(message: string, duration = 2500): void {
   try {
-    const existing = document.querySelector('.promtify-toast');
+    const existing = document.querySelector('.promptforge-toast');
     if (existing) existing.remove();
 
     const toast = document.createElement('div');
-    toast.className = 'promtify-toast';
+    toast.className = 'promptforge-toast';
     toast.textContent = message;
     document.body.appendChild(toast);
 
@@ -306,7 +306,7 @@ export function removeWand(): void {
     activeWandButton.remove();
     activeWandButton = null;
   }
-  document.querySelectorAll('.promtify-wand-btn').forEach((el) => el.remove());
+  document.querySelectorAll('.promptforge-wand-btn').forEach((el) => el.remove());
 }
 
 /**
@@ -382,7 +382,7 @@ export async function handleEnhanceRequest(
       if (activeWandButton) {
         setWandState(activeWandButton, 'success');
       }
-      showToast('Prompt enhanced with Promtify AI!');
+      showToast('Prompt enhanced with PromptForge AI!');
       return { success: true, prompt: response.prompt };
     } else {
       const error = response?.error || 'Failed to enhance prompt';

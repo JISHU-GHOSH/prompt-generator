@@ -9,7 +9,7 @@ describe('Manifest V3 Configuration', () => {
 
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
     expect(manifest.manifest_version).toBe(3);
-    expect(manifest.name).toBe('Promtify AI - Professional Coding Prompt Generator');
+    expect(manifest.name).toBe('PromptForge AI - Professional Coding Prompt Generator');
     expect(manifest.permissions).toContain('sidePanel');
     expect(manifest.permissions).toContain('storage');
     expect(manifest.permissions).toContain('activeTab');

@@ -16,8 +16,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
 export const MAX_HISTORY_ITEMS = 100;
 
 const STORAGE_KEYS = {
-  SETTINGS: 'promtify_settings',
-  HISTORY: 'promtify_history',
+  SETTINGS: 'promptforge_settings',
+  HISTORY: 'promptforge_history',
 } as const;
 
 let inMemoryStore: Record<string, unknown> = {};
