@@ -7,14 +7,17 @@ export default defineConfig({
   plugins: [
     react() as any,
     {
-      name: 'copy-manifest-plugin',
+      name: 'extension-packaging-plugin',
       closeBundle() {
+        const distDir = resolve(__dirname, 'dist');
+        if (!fs.existsSync(distDir)) {
+          fs.mkdirSync(distDir, { recursive: true });
+        }
+
+        // Copy and transform manifest.json (.ts -> .js)
         const manifestSrc = resolve(__dirname, 'manifest.json');
-        const manifestDist = resolve(__dirname, 'dist/manifest.json');
+        const manifestDist = resolve(distDir, 'manifest.json');
         if (fs.existsSync(manifestSrc)) {
-          if (!fs.existsSync(resolve(__dirname, 'dist'))) {
-            fs.mkdirSync(resolve(__dirname, 'dist'), { recursive: true });
-          }
           const raw = fs.readFileSync(manifestSrc, 'utf-8');
           const manifest = JSON.parse(raw);
           if (manifest.background && typeof manifest.background.service_worker === 'string') {
@@ -32,6 +35,30 @@ export default defineConfig({
             });
           }
           fs.writeFileSync(manifestDist, JSON.stringify(manifest, null, 2));
+        }
+
+        // Copy content script CSS to dist/src/content/content.css
+        const contentCssSrc = resolve(__dirname, 'src/content/content.css');
+        const contentCssDistDir = resolve(distDir, 'src/content');
+        const contentCssDist = resolve(contentCssDistDir, 'content.css');
+        if (fs.existsSync(contentCssSrc)) {
+          if (!fs.existsSync(contentCssDistDir)) {
+            fs.mkdirSync(contentCssDistDir, { recursive: true });
+          }
+          fs.copyFileSync(contentCssSrc, contentCssDist);
+        }
+
+        // Ensure icons directory in dist
+        const iconsSrcDir = resolve(__dirname, 'public/icons');
+        const iconsDistDir = resolve(distDir, 'icons');
+        if (fs.existsSync(iconsSrcDir)) {
+          if (!fs.existsSync(iconsDistDir)) {
+            fs.mkdirSync(iconsDistDir, { recursive: true });
+          }
+          const iconFiles = fs.readdirSync(iconsSrcDir);
+          for (const iconFile of iconFiles) {
+            fs.copyFileSync(resolve(iconsSrcDir, iconFile), resolve(iconsDistDir, iconFile));
+          }
         }
       },
     },

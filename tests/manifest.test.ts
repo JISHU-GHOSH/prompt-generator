@@ -20,4 +20,22 @@ describe('Manifest V3 Configuration', () => {
       expect(fs.existsSync(iconFile), `Missing icon-${size}.png`).toBe(true);
     }
   });
+
+  it('should have all required artifacts in dist if build is run', () => {
+    const distPath = path.resolve(__dirname, '../dist');
+    if (fs.existsSync(distPath)) {
+      const distManifest = path.resolve(distPath, 'manifest.json');
+      expect(fs.existsSync(distManifest)).toBe(true);
+      const manifest = JSON.parse(fs.readFileSync(distManifest, 'utf-8'));
+      expect(manifest.background.service_worker).toBe('src/background/service-worker.js');
+
+      expect(fs.existsSync(path.resolve(distPath, 'src/background/service-worker.js'))).toBe(true);
+      expect(fs.existsSync(path.resolve(distPath, 'src/sidepanel/index.html'))).toBe(true);
+      expect(fs.existsSync(path.resolve(distPath, 'src/content/content-script.js'))).toBe(true);
+      expect(fs.existsSync(path.resolve(distPath, 'src/content/content.css'))).toBe(true);
+      for (const size of ['16', '48', '128']) {
+        expect(fs.existsSync(path.resolve(distPath, `icons/icon-${size}.png`))).toBe(true);
+      }
+    }
+  });
 });
