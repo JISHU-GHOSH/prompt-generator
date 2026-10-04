@@ -13,6 +13,7 @@ describe('Manifest V3 Configuration', () => {
     expect(manifest.permissions).toContain('sidePanel');
     expect(manifest.permissions).toContain('storage');
     expect(manifest.permissions).toContain('activeTab');
+    expect(manifest.host_permissions).toContain('https://api.groq.com/*');
 
     // Verify icons exist on disk
     for (const size of ['16', '48', '128']) {
@@ -28,6 +29,7 @@ describe('Manifest V3 Configuration', () => {
       expect(fs.existsSync(distManifest)).toBe(true);
       const manifest = JSON.parse(fs.readFileSync(distManifest, 'utf-8'));
       expect(manifest.background.service_worker).toBe('src/background/service-worker.js');
+      expect(manifest.host_permissions).toContain('https://api.groq.com/*');
 
       expect(fs.existsSync(path.resolve(distPath, 'src/background/service-worker.js'))).toBe(true);
       expect(fs.existsSync(path.resolve(distPath, 'src/sidepanel/index.html'))).toBe(true);
