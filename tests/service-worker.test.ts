@@ -157,6 +157,51 @@ describe('Background Service Worker Message Handler', () => {
       expect(history[0].enhancedPrompt).toBe('Engineered Prompt for Coding Agent');
       expect(history[0].preset).toBe('coding-agent');
       expect(history[0].techStack).toEqual(['React', 'TypeScript', 'Tailwind CSS']);
+      expect(response.activeModel).toBeDefined();
+      expect(history[0].activeModelUsed).toBeDefined();
+    });
+
+    it('should track and return activeModel when client provides getActiveModelUsed', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('Enhanced output');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+        getActiveModelUsed: vi.fn().mockReturnValue('llama-3.3-70b-versatile'),
+      } as any);
+
+      const response = await handleBackgroundMessage({
+        type: 'ENHANCE_PROMPT',
+        payload: {
+          rawInput: 'optimize database queries',
+          preset: 'bugfix',
+        },
+      });
+
+      expect(response.success).toBe(true);
+      expect(response.activeModel).toBe('llama-3.3-70b-versatile');
+
+      const history = await storageService.getHistory();
+      expect(history[0].activeModelUsed).toBe('llama-3.3-70b-versatile');
+    });
+
+    it('should fallback to settings.provider when client does not implement getActiveModelUsed', async () => {
+      await storageService.saveSettings({ provider: 'gemini' });
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('Enhanced output via gemini');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+      } as any);
+
+      const response = await handleBackgroundMessage({
+        type: 'ENHANCE_PROMPT',
+        payload: {
+          rawInput: 'create rust microservice',
+        },
+      });
+
+      expect(response.success).toBe(true);
+      expect(response.activeModel).toBe('gemini');
+
+      const history = await storageService.getHistory();
+      expect(history[0].activeModelUsed).toBe('gemini');
     });
 
     it('should handle ENHANCE_PROMPT when arguments are passed at top-level', async () => {
@@ -174,6 +219,7 @@ describe('Background Service Worker Message Handler', () => {
       expect(response.success).toBe(true);
       expect(response.prompt).toBe('Engineered RFC Spec');
       expect(response.id).toBeDefined();
+      expect(response.activeModel).toBeDefined();
     });
 
     it('should return error when rawInput is empty or whitespace', async () => {

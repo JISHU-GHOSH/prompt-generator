@@ -62,18 +62,25 @@ export async function handleBackgroundMessage(message: any, sender?: any): Promi
           compiled.userPrompt
         );
 
+        const activeModel: string =
+          typeof (aiClient as any).getActiveModelUsed === 'function'
+            ? (aiClient as any).getActiveModelUsed()
+            : settings.provider;
+
         const historyItem = await storageService.addHistoryItem({
           rawInput: String(rawInput).trim(),
           enhancedPrompt,
           preset: targetPreset,
           techStack: targetTechStack,
           isFavorite: false,
+          activeModelUsed: activeModel,
         });
 
         return {
           success: true,
           prompt: enhancedPrompt,
           id: historyItem.id,
+          activeModel,
         };
       }
 
