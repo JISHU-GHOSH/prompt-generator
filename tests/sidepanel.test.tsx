@@ -351,6 +351,25 @@ describe('Side Panel React Application', () => {
       expect(screen.getByText(/LLaMA 3.3 70B/i)).toBeInTheDocument();
     });
 
+    it('should display LLaMA 3.1 8B model badge in OutputViewer when model includes 8b', async () => {
+      const mockGeneratePrompt = vi.fn().mockResolvedValue('## Enhanced Fast Plan');
+      vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({
+        generatePrompt: mockGeneratePrompt,
+        getActiveModelUsed: vi.fn().mockReturnValue('llama-3.1-8b-instant'),
+      } as any);
+
+      render(<App />);
+
+      const textarea = await screen.findByPlaceholderText(/Describe what you want to build/i);
+      fireEvent.change(textarea, { target: { value: 'Create quick utility' } });
+
+      const enhanceBtn = screen.getByRole('button', { name: /Promptify|Enhance/i });
+      fireEvent.click(enhanceBtn);
+
+      expect(await screen.findByText(/Enhanced Fast Plan/i)).toBeInTheDocument();
+      expect(screen.getByText(/LLaMA 3.1 8B/i)).toBeInTheDocument();
+    });
+
     it('should display Gemini 3.8 Flash model badge when active model is gemini-3.8-flash', async () => {
       const mockGeneratePrompt = vi.fn().mockResolvedValue('## Gemini Enhanced Plan');
       vi.spyOn(clientFactory, 'getAIClient').mockReturnValue({

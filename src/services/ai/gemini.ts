@@ -184,7 +184,7 @@ export class GeminiClient implements AIClient {
     }
     if (response.status === 404) {
       throw new Error(
-        `Gemini API error (404): Model '${this.model}' not found or retired by Google. Please select 'gemini-2.5-flash' or 'gemini-2.0-flash' in Settings.`
+        `Gemini API error (404): Model '${this.model}' not found or retired by Google. Please select 'gemini-3.8-flash', 'gemini-2.5-flash', or 'gemini-2.0-flash' in Settings.`
       );
     }
     if (response.status === 401 || response.status === 403) {

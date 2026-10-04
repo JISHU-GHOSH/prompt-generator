@@ -118,6 +118,25 @@ export class GroqClient implements AIClient {
           }
         }
       }
+
+      if (buffer.trim()) {
+        const line = buffer.trim();
+        if (line.startsWith('data: ') || line.startsWith('data:')) {
+          const dataStr = (line.startsWith('data: ') ? line.slice(6) : line.slice(5)).trim();
+          if (dataStr && dataStr !== '[DONE]') {
+            try {
+              const parsed = JSON.parse(dataStr);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                accumulatedText += content;
+                onChunk(content);
+              }
+            } catch {
+              // ignore parse errors on trailing partial buffer
+            }
+          }
+        }
+      }
     } finally {
       if (typeof reader.releaseLock === 'function') {
         reader.releaseLock();

@@ -10,6 +10,57 @@ export interface OutputViewerProps {
   isSaved?: boolean;
 }
 
+export const renderModelBadge = (model?: string) => {
+  if (!model) return null;
+  const lower = model.toLowerCase();
+
+  if (lower.includes('8b')) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-950/80 text-purple-300 border border-purple-800/60 shadow-sm">
+        ⚡ LLaMA 3.1 8B
+      </span>
+    );
+  }
+  if (lower.includes('llama') || lower.includes('70b') || lower === 'llama-3.3-70b-versatile') {
+    return (
+      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-300 border border-purple-500/30">
+        <span>⚡ LLaMA 3.3 70B</span>
+      </span>
+    );
+  }
+  if (lower.includes('gemini-3.8') || lower === 'gemini-3.8-flash') {
+    return (
+      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-sky-500/15 text-sky-300 border border-sky-500/30">
+        <span>✨ Gemini 3.8 Flash</span>
+      </span>
+    );
+  }
+  if (lower.includes('gemini-2.5') || lower === 'gemini-2.5-flash') {
+    return (
+      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-300 border border-blue-500/30">
+        <span>✨ Gemini 2.5 Flash</span>
+      </span>
+    );
+  }
+  if (
+    lower.includes('local-synthesizer') ||
+    lower.includes('synthesizer') ||
+    lower.includes('offline')
+  ) {
+    return (
+      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+        <span>🛡️ Offline Engine</span>
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
+      <span>{model}</span>
+    </span>
+  );
+};
+
 export const OutputViewer: React.FC<OutputViewerProps> = ({
   prompt,
   activeModel,
@@ -24,50 +75,6 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
   const charCount = prompt.length;
   const wordCount = prompt.trim() ? prompt.trim().split(/\s+/).length : 0;
   const estimatedTokens = Math.ceil(charCount / 4);
-
-  const renderModelBadge = () => {
-    if (!activeModel) return null;
-    const lower = activeModel.toLowerCase();
-
-    if (lower.includes('llama') || lower === 'llama-3.3-70b-versatile') {
-      return (
-        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-300 border border-purple-500/30">
-          <span>⚡ LLaMA 3.3 70B</span>
-        </span>
-      );
-    }
-    if (lower.includes('gemini-3.8') || lower === 'gemini-3.8-flash') {
-      return (
-        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-sky-500/15 text-sky-300 border border-sky-500/30">
-          <span>✨ Gemini 3.8 Flash</span>
-        </span>
-      );
-    }
-    if (lower.includes('gemini-2.5') || lower === 'gemini-2.5-flash') {
-      return (
-        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-300 border border-blue-500/30">
-          <span>✨ Gemini 2.5 Flash</span>
-        </span>
-      );
-    }
-    if (
-      lower.includes('local-synthesizer') ||
-      lower.includes('synthesizer') ||
-      lower.includes('offline')
-    ) {
-      return (
-        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-          <span>🛡️ Offline Engine</span>
-        </span>
-      );
-    }
-
-    return (
-      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
-        <span>{activeModel}</span>
-      </span>
-    );
-  };
 
   const handleCopy = async () => {
     if (!prompt) return;
@@ -102,7 +109,7 @@ export const OutputViewer: React.FC<OutputViewerProps> = ({
       <div className="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800">
         <div className="flex items-center space-x-2 text-[11px] text-slate-400">
           <span className="font-semibold text-slate-200">Result</span>
-          {renderModelBadge()}
+          {renderModelBadge(activeModel)}
           <span>•</span>
           <span>{wordCount} words</span>
           <span>•</span>

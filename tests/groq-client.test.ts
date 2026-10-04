@@ -144,4 +144,35 @@ describe('GroqClient', () => {
     const client = new GroqClient('gsk_test_key');
     await expect(client.generatePrompt('system', 'user')).rejects.toThrow(/500.*Internal Server Error/i);
   });
+
+  it('should flush trailing SSE buffer when stream ends without trailing newline', async () => {
+    const chunks = [
+      'data: {"choices":[{"delta":{"content":"Start "}}]}\n\n',
+      'data: {"choices":[{"delta":{"content":"End"}}]}',
+    ];
+
+    const stream = new ReadableStream({
+      start(controller) {
+        for (const chunk of chunks) {
+          controller.enqueue(new TextEncoder().encode(chunk));
+        }
+        controller.close();
+      },
+    });
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      body: stream,
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const onChunk = vi.fn();
+    const client = new GroqClient('gsk_test_key');
+    const result = await client.generatePrompt('system', 'user', onChunk);
+
+    expect(result).toBe('Start End');
+    expect(onChunk).toHaveBeenCalledWith('Start ');
+    expect(onChunk).toHaveBeenCalledWith('End');
+  });
 });

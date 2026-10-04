@@ -199,7 +199,9 @@ describe('GeminiClient', () => {
     vi.stubGlobal('fetch', mockFetch);
 
     const client = new GeminiClient('valid-key', 'gemini-1.5-flash');
-    await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(/retired by Google/i);
+    await expect(client.generatePrompt('sys', 'user')).rejects.toThrow(
+      /retired by Google\. Please select 'gemini-3\.8-flash'/i
+    );
   });
 
   it('should handle 500 service error', async () => {
