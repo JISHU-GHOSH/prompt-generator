@@ -92,26 +92,18 @@ Preserve all established architectural patterns and conventions. Deliver the com
   }
 
   private synthesizeIdeation(rawInput: string, additionalContext?: string): string {
-    return `You are a Principal Product Strategist, Lead System Architect, and Startup Technical Co-founder.
+    const cleanedTopic = rawInput
+      .replace(/^(i have to make|make|build|create|design|tell me what features can we add and what should we do on|on this topic|tell me what features can we add and what should we do)\s*/gi, '')
+      .replace(/^(an?|the)\s+/i, '')
+      .trim() || rawInput.trim();
 
-I am designing a new product for: ${rawInput}.
+    const p1 = `You are a principal product strategist, lead software architect, and technical co-founder specializing in interactive digital platforms and modern software systems. I need you to provide a comprehensive, prioritized feature roadmap and architectural discovery breakdown for ${cleanedTopic}, detailing the target user personas, core user friction points, and the high-leverage capabilities that will differentiate this product from existing market alternatives.`;
 
-I need you to provide a comprehensive, prioritized Product Strategy and Feature Roadmap that aligns engineering and user experience:
+    const p2 = `For each proposed feature and architectural domain—including real-time interactive workflows, automated evaluation mechanisms, domain-specific categorization, behavioral telemetry, and user retention loops—explicitly analyze why you selected this specific user flow and technical pattern over simpler alternatives. Address critical product trade-offs, technical feasibility, latency constraints for real-time interactions, data privacy, and user engagement mechanics that maximize recurring active retention.${additionalContext ? ` Integrate existing project constraints: ${additionalContext}.` : ''}`;
 
-1. Target Personas & Core User Friction:
-   - Identify the primary user personas and the 3 most critical pain points or unmet needs they face in this problem space.
+    const p3 = `Structure your guidance around clear delivery phases: foundational MVP boundary definition identifying the top three essential features required for initial launch, user onboarding and diagnostic workflows, secondary engagement loops and progress telemetry, and long-term scalability milestones. Throughout, maintain a formal, authoritative, and strategic product engineering tone without writing code snippets at this stage, ensuring that the team can immediately evaluate feasibility, prioritize development sprints, and execute without ambiguity.`;
 
-2. Prioritized Feature Breakdown (Top 5–7 High-Impact Features):
-   - For each feature, detail:
-     - User Value Proposition: Why users will adopt and love this capability.
-     - Competitive Differentiator: How this feature sets the platform apart from generic alternatives or incumbents.
-     - Technical Feasibility & Complexity: Feasibility rating (Low / Medium / High) and core architectural dependencies.
-
-3. MVP Boundary Definition (Phase 1 vs. Phase 2):
-   - Explicitly define the minimum set of 3 core features required to launch a viable, compelling v1 product.
-   - Outline key product telemetry metrics (North Star metric, engagement indicators, and user retention drivers).${additionalContext ? `\n\nIncorporate existing constraints: ${additionalContext}.` : ''}
-
-CRITICAL REQUIREMENT: Focus strictly on product strategy, user experience journeys, feature prioritization, and system trade-offs. DO NOT generate code snippets or programming boilerplate at this ideation stage.`;
+    return `${p1}\n\n${p2}\n\n${p3}`;
   }
 
   private synthesize(userPrompt: string): string {

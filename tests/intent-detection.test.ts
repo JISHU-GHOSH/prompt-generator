@@ -43,8 +43,9 @@ describe('Smart Intent Auto-Detection', () => {
       });
 
       expect(result.intent).toBe('ideation');
-      expect(result.systemPrompt).toContain('STRICT CONSTRAINT — NO CODE SNIPPETS');
-      expect(result.systemPrompt).toContain('Principal Product Strategist');
+      expect(result.systemPrompt).toContain('DO NOT output markdown code blocks');
+      expect(result.systemPrompt).toContain('principal product strategist');
+      expect(result.systemPrompt).toContain('EXACTLY 3 CONTINUOUS PARAGRAPHS');
       expect(result.userPrompt).toContain('Product Ideation & Feature Discovery');
       expect(result.userPrompt).toContain('STRICTLY DO NOT generate code snippets');
     });

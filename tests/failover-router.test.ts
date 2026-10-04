@@ -405,12 +405,12 @@ describe('LocalSynthesizer', () => {
       'i have to make an on this topic Interview preparation & practice tell me what features can we add and what should we do'
     );
 
-    expect(prompt).toContain('Principal Product Strategist');
-    expect(prompt).toContain('Target Personas & Core User Friction');
-    expect(prompt).toContain('Prioritized Feature Breakdown');
-    expect(prompt).toContain('MVP Boundary Definition');
-    expect(prompt).toContain('DO NOT generate code snippets or programming boilerplate');
+    expect(prompt).toContain('principal product strategist');
+    expect(prompt).toContain('prioritized feature roadmap');
+    expect(prompt).toContain('MVP boundary definition');
+    expect(prompt).toContain('without writing code snippets');
     expect(prompt).not.toContain('```');
+    expect(prompt.split('\n\n').length).toBe(3);
   });
 
   it('should invoke onChunk callback when provided', async () => {
